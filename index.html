@@ -23,10 +23,29 @@
 <style>
   html, body { margin: 0; padding: 0; background: #F1F3F6; }
   #root { min-height: 100vh; }
+  #boot-error { display:none; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: #C1443D; background: #FBEAE9; border: 1px solid #F0D3D1; margin: 16px; padding: 14px; border-radius: 8px; }
 </style>
 </head>
 <body>
 <div id="root"></div>
-<script type="module" src="entry.js"></script>
+<div id="boot-error"></div>
+<script>
+  function showBootError(msg) {
+    var el = document.getElementById('boot-error');
+    el.textContent = 'Startup error:\n\n' + msg;
+    el.style.display = 'block';
+  }
+  window.addEventListener('error', function (e) {
+    showBootError((e.error && e.error.stack) || e.message || String(e));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showBootError((e.reason && (e.reason.stack || e.reason.message)) || String(e.reason));
+  });
+</script>
+<script>
+  import('./entry.js').catch(function (err) {
+    showBootError((err && (err.stack || err.message)) || String(err));
+  });
+</script>
 </body>
 </html>
