@@ -106,6 +106,21 @@ var Pencil = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
   /* @__PURE__ */ jsx("path", { d: "M12 20 h9" }),
   /* @__PURE__ */ jsx("path", { d: "M16.5 3.5 a2.1 2.1 0 0 1 3 3 L7 19 l-4 1 1-4 Z" })
 ] });
+var Menu = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("line", { x1: "4", y1: "7", x2: "20", y2: "7" }),
+  /* @__PURE__ */ jsx("line", { x1: "4", y1: "12", x2: "20", y2: "12" }),
+  /* @__PURE__ */ jsx("line", { x1: "4", y1: "17", x2: "20", y2: "17" })
+] });
+var Printer = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("polyline", { points: "6 9 6 2 18 2 18 9" }),
+  /* @__PURE__ */ jsx("rect", { x: "6", y: "14", width: "12", height: "8" }),
+  /* @__PURE__ */ jsx("path", { d: "M6 14 H4 a2 2 0 0 1 -2 -2 V9 a2 2 0 0 1 2 -2 H20 a2 2 0 0 1 2 2 V12 a2 2 0 0 1 -2 2 H18" })
+] });
+var Timer = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("line", { x1: "10", y1: "2", x2: "14", y2: "2" }),
+  /* @__PURE__ */ jsx("line", { x1: "12", y1: "4", x2: "12", y2: "7" }),
+  /* @__PURE__ */ jsx("circle", { cx: "12", cy: "13", r: "8" })
+] });
 
 // app.jsx
 import { Fragment, jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
@@ -326,6 +341,7 @@ function App() {
   ] });
 }
 function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   return /* @__PURE__ */ jsxs2("header", { style: styles.topbar, children: [
     /* @__PURE__ */ jsxs2("div", { style: styles.brand, onClick: onHome, children: [
       /* @__PURE__ */ jsx2("div", { style: styles.brandMark, children: /* @__PURE__ */ jsx2("img", { src: LOGO_SRC, alt: "PracOx", style: styles.brandMarkImg }) }),
@@ -335,8 +351,42 @@ function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings }) {
       ] })
     ] }),
     /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 8 }, children: [
-      mode === "admin" && /* @__PURE__ */ jsx2("button", { style: styles.historyBtn, onClick: onSettings, title: "Admin PIN settings", children: /* @__PURE__ */ jsx2(Settings, { size: 16 }) }),
-      mode === "admin" && /* @__PURE__ */ jsx2("button", { style: styles.historyBtn, onClick: onDiag, title: "Test storage connection", children: /* @__PURE__ */ jsx2(Bug, { size: 16 }) }),
+      mode === "admin" && /* @__PURE__ */ jsxs2("div", { style: { position: "relative" }, children: [
+        /* @__PURE__ */ jsx2("button", { style: styles.historyBtn, onClick: () => setMenuOpen((v) => !v), title: "Menu", children: /* @__PURE__ */ jsx2(Menu, { size: 16 }) }),
+        menuOpen && /* @__PURE__ */ jsxs2(Fragment, { children: [
+          /* @__PURE__ */ jsx2("div", { style: styles.menuBackdrop, onClick: () => setMenuOpen(false) }),
+          /* @__PURE__ */ jsxs2("div", { style: styles.menuPanel, children: [
+            /* @__PURE__ */ jsxs2(
+              "button",
+              {
+                style: styles.menuItem,
+                onClick: () => {
+                  setMenuOpen(false);
+                  onSettings();
+                },
+                children: [
+                  /* @__PURE__ */ jsx2(Settings, { size: 14 }),
+                  " Admin PIN settings"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxs2(
+              "button",
+              {
+                style: styles.menuItem,
+                onClick: () => {
+                  setMenuOpen(false);
+                  onDiag();
+                },
+                children: [
+                  /* @__PURE__ */ jsx2(Bug, { size: 14 }),
+                  " Test storage connection"
+                ]
+              }
+            )
+          ] })
+        ] })
+      ] }),
       mode === "student" && /* @__PURE__ */ jsx2("button", { style: styles.historyBtn, onClick: onHistory, title: "My score history", children: /* @__PURE__ */ jsx2(History, { size: 16 }) }),
       /* @__PURE__ */ jsxs2("div", { style: styles.modeSwitch, children: [
         /* @__PURE__ */ jsxs2(
@@ -624,7 +674,8 @@ var BLANK_Q = () => ({
     { text: "", image: null }
   ],
   correct: 0,
-  explanation: ""
+  explanation: "",
+  timeSeconds: 60
 });
 function ManageQuestions({ exam, subjectId, chapterId, onBack, showToast }) {
   const [questions, setQuestions] = useState(null);
@@ -632,13 +683,29 @@ function ManageQuestions({ exam, subjectId, chapterId, onBack, showToast }) {
   const [draft, setDraft] = useState(BLANK_Q());
   const [editingId, setEditingId] = useState(null);
   const [bulkText, setBulkText] = useState("");
+  const [settings, setSettings] = useState(null);
+  const [printOpen, setPrintOpen] = useState(false);
   const key = `questions:${exam.id}:${subjectId}:${chapterId}`;
+  const settingsKey = `settings:${exam.id}:${subjectId}:${chapterId}`;
   const load = useCallback(async () => {
     setQuestions(await sGet(key, []));
   }, [key]);
+  const loadSettings = useCallback(async () => {
+    setSettings(await sGet(settingsKey, { timingMode: "off", totalSeconds: 600 }));
+  }, [settingsKey]);
   useEffect(() => {
     load();
-  }, [load]);
+    loadSettings();
+  }, [load, loadSettings]);
+  const saveSettings = async (next) => {
+    const prev = settings;
+    setSettings(next);
+    const res = await sSet(settingsKey, next);
+    if (!res.ok) {
+      setSettings(prev);
+      showToast(`Save failed: ${res.error}. ${APP_HINT}`, "error");
+    }
+  };
   const startEdit = (q) => {
     setDraft({
       id: q.id,
@@ -646,7 +713,8 @@ function ManageQuestions({ exam, subjectId, chapterId, onBack, showToast }) {
       image: q.image || null,
       options: q.options.map((o) => ({ text: o.text || "", image: o.image || null })),
       correct: q.correct,
-      explanation: q.explanation || ""
+      explanation: q.explanation || "",
+      timeSeconds: q.timeSeconds || 60
     });
     setEditingId(q.id);
     setTab("single");
@@ -755,6 +823,18 @@ function ManageQuestions({ exam, subjectId, chapterId, onBack, showToast }) {
   return /* @__PURE__ */ jsxs2("div", { children: [
     /* @__PURE__ */ jsx2(BackRow, { onBack, label: "Back" }),
     /* @__PURE__ */ jsx2(SectionHeading, { eyebrow: "Admin", title: "Manage questions", sub: `${questions.length} question${questions.length === 1 ? "" : "s"} saved here` }),
+    questions.length > 0 && /* @__PURE__ */ jsxs2("button", { style: { ...styles.ghostBtn, marginBottom: 14 }, onClick: () => setPrintOpen(true), children: [
+      /* @__PURE__ */ jsx2(Printer, { size: 14 }),
+      " Print / export PDF"
+    ] }),
+    printOpen && /* @__PURE__ */ jsx2(
+      PrintExportModal,
+      {
+        questions,
+        examLabel: exam.label,
+        onClose: () => setPrintOpen(false)
+      }
+    ),
     /* @__PURE__ */ jsxs2("div", { style: styles.tabs, children: [
       /* @__PURE__ */ jsxs2("button", { style: { ...styles.tabBtn, ...tab === "list" ? styles.tabBtnActive : {} }, onClick: () => {
         cancelEdit();
@@ -776,8 +856,16 @@ function ManageQuestions({ exam, subjectId, chapterId, onBack, showToast }) {
       }, children: [
         /* @__PURE__ */ jsx2(Layers, { size: 14 }),
         " Paste many"
+      ] }),
+      /* @__PURE__ */ jsxs2("button", { style: { ...styles.tabBtn, ...tab === "timing" ? styles.tabBtnActive : {} }, onClick: () => {
+        cancelEdit();
+        setTab("timing");
+      }, children: [
+        /* @__PURE__ */ jsx2(Timer, { size: 14 }),
+        " Timing"
       ] })
     ] }),
+    tab === "timing" && settings && /* @__PURE__ */ jsx2(TimingPanel, { settings, onSave: saveSettings }),
     tab === "list" && /* @__PURE__ */ jsx2("div", { children: questions.length === 0 ? /* @__PURE__ */ jsx2(EmptyState, { icon: /* @__PURE__ */ jsx2(ClipboardList, { size: 22 }), text: "No questions yet. Use \u201CAdd one\u201D or \u201CPaste many\u201D to get started." }) : /* @__PURE__ */ jsx2("div", { style: styles.qList, children: questions.map((q, i) => /* @__PURE__ */ jsxs2("div", { style: styles.qCard, children: [
       /* @__PURE__ */ jsxs2("div", { style: styles.qCardHead, children: [
         /* @__PURE__ */ jsxs2("span", { style: styles.qNum, children: [
@@ -880,6 +968,19 @@ function ManageQuestions({ exam, subjectId, chapterId, onBack, showToast }) {
           placeholder: "Shown to students after they submit \u2014 leave blank if not needed"
         }
       ),
+      settings && settings.timingMode === "per" && /* @__PURE__ */ jsxs2(Fragment, { children: [
+        /* @__PURE__ */ jsx2("label", { style: styles.fieldLabel, children: "Time limit for this question (seconds)" }),
+        /* @__PURE__ */ jsx2(
+          "input",
+          {
+            type: "number",
+            min: "5",
+            style: styles.input,
+            value: draft.timeSeconds,
+            onChange: (e) => setDraft({ ...draft, timeSeconds: Math.max(5, parseInt(e.target.value) || 60) })
+          }
+        )
+      ] }),
       /* @__PURE__ */ jsxs2("div", { style: styles.formRow, children: [
         /* @__PURE__ */ jsx2("button", { style: styles.primaryBtn, onClick: saveSingle, children: editingId ? /* @__PURE__ */ jsxs2(Fragment, { children: [
           /* @__PURE__ */ jsx2(Check, { size: 14 }),
@@ -926,8 +1027,104 @@ ANSWER: B` })
     ] })
   ] });
 }
+function TimingPanel({ settings, onSave }) {
+  const [mode, setMode] = useState(settings.timingMode);
+  const [minutes, setMinutes] = useState(Math.round((settings.totalSeconds || 600) / 60));
+  const save = () => {
+    onSave({ timingMode: mode, totalSeconds: Math.max(1, minutes) * 60 });
+  };
+  return /* @__PURE__ */ jsxs2("div", { style: styles.singleForm, children: [
+    /* @__PURE__ */ jsx2("label", { style: styles.fieldLabel, children: "How should this quiz be timed?" }),
+    /* @__PURE__ */ jsxs2("div", { style: { display: "flex", flexDirection: "column", gap: 8 }, children: [
+      /* @__PURE__ */ jsxs2("label", { style: styles.radioRow, children: [
+        /* @__PURE__ */ jsx2("input", { type: "radio", checked: mode === "off", onChange: () => setMode("off") }),
+        /* @__PURE__ */ jsxs2("div", { children: [
+          /* @__PURE__ */ jsx2("div", { style: styles.radioTitle, children: "No timing" }),
+          /* @__PURE__ */ jsx2("div", { style: styles.radioSub, children: "All questions on one page, no timer \u2014 how it works today." })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs2("label", { style: styles.radioRow, children: [
+        /* @__PURE__ */ jsx2("input", { type: "radio", checked: mode === "per", onChange: () => setMode("per") }),
+        /* @__PURE__ */ jsxs2("div", { children: [
+          /* @__PURE__ */ jsx2("div", { style: styles.radioTitle, children: "Time each question separately" }),
+          /* @__PURE__ */ jsx2("div", { style: styles.radioSub, children: "One question per screen. Set a time limit per question when adding it \u2014 when it runs out, the app auto-advances to the next question." })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs2("label", { style: styles.radioRow, children: [
+        /* @__PURE__ */ jsx2("input", { type: "radio", checked: mode === "total", onChange: () => setMode("total") }),
+        /* @__PURE__ */ jsxs2("div", { children: [
+          /* @__PURE__ */ jsx2("div", { style: styles.radioTitle, children: "One total time for the whole set" }),
+          /* @__PURE__ */ jsx2("div", { style: styles.radioSub, children: "One question per screen, with a single countdown for the entire quiz \u2014 when it runs out, it auto-submits." })
+        ] })
+      ] })
+    ] }),
+    mode === "total" && /* @__PURE__ */ jsxs2(Fragment, { children: [
+      /* @__PURE__ */ jsx2("label", { style: styles.fieldLabel, children: "Total time (minutes)" }),
+      /* @__PURE__ */ jsx2(
+        "input",
+        {
+          type: "number",
+          min: "1",
+          style: styles.input,
+          value: minutes,
+          onChange: (e) => setMinutes(Math.max(1, parseInt(e.target.value) || 1))
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsx2("div", { style: styles.formRow, children: /* @__PURE__ */ jsxs2("button", { style: styles.primaryBtn, onClick: save, children: [
+      /* @__PURE__ */ jsx2(Check, { size: 14 }),
+      " Save timing settings"
+    ] }) })
+  ] });
+}
+function PrintExportModal({ questions, examLabel, onClose }) {
+  const [withAnswers, setWithAnswers] = useState(null);
+  const doPrint = (answers) => {
+    setWithAnswers(answers);
+    setTimeout(() => window.print(), 80);
+  };
+  if (withAnswers === null) {
+    return /* @__PURE__ */ jsx2("div", { style: styles.modalBackdrop, onClick: onClose, children: /* @__PURE__ */ jsxs2("div", { style: styles.modalCard, onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsx2("div", { style: styles.fieldLabel, children: "Export as" }),
+      /* @__PURE__ */ jsxs2("div", { style: styles.formRow, children: [
+        /* @__PURE__ */ jsx2("button", { style: styles.primaryBtn, onClick: () => doPrint(false), children: "Questions only" }),
+        /* @__PURE__ */ jsx2("button", { style: styles.primaryBtn, onClick: () => doPrint(true), children: "With answer key" })
+      ] }),
+      /* @__PURE__ */ jsx2("button", { style: { ...styles.ghostBtn, marginTop: 10, width: "100%", justifyContent: "center" }, onClick: onClose, children: "Cancel" }),
+      /* @__PURE__ */ jsx2("div", { style: styles.hint, children: `Your browser's print dialog will open next \u2014 choose "Save as PDF" there to download it.` })
+    ] }) });
+  }
+  return /* @__PURE__ */ jsxs2("div", { id: "print-root", className: "pracox-print-layer", style: styles.printLayer, children: [
+    /* @__PURE__ */ jsxs2("h1", { style: { fontFamily: "'Fraunces', serif" }, children: [
+      examLabel,
+      " \u2014 Question Paper",
+      withAnswers ? " (Answer Key)" : ""
+    ] }),
+    questions.map((q, i) => /* @__PURE__ */ jsxs2("div", { style: { marginBottom: 18, pageBreakInside: "avoid" }, children: [
+      /* @__PURE__ */ jsxs2("div", { style: { fontWeight: 600, marginBottom: 4 }, children: [
+        "Q",
+        i + 1,
+        ". ",
+        q.text
+      ] }),
+      q.image && /* @__PURE__ */ jsx2("img", { src: q.image, alt: "", style: { maxWidth: 300, display: "block", marginBottom: 6 } }),
+      q.options.map((o, oi) => /* @__PURE__ */ jsxs2("div", { style: { marginLeft: 16, ...withAnswers && oi === q.correct ? { fontWeight: 700, color: "#2F9E44" } : {} }, children: [
+        String.fromCharCode(65 + oi),
+        ". ",
+        o.text,
+        withAnswers && oi === q.correct ? "  \u2713" : ""
+      ] }, oi)),
+      withAnswers && q.explanation && /* @__PURE__ */ jsxs2("div", { style: { marginLeft: 16, marginTop: 4, fontStyle: "italic", color: "#555" }, children: [
+        "Explanation: ",
+        q.explanation
+      ] })
+    ] }, q.id)),
+    /* @__PURE__ */ jsx2("div", { className: "no-print", style: { marginTop: 20 }, children: /* @__PURE__ */ jsx2("button", { style: styles.ghostBtn, onClick: onClose, children: "Close print view" }) })
+  ] });
+}
 function QuizScreen({ exam, subjectId, chapterId, studentName, setStudentName, onBack, showToast }) {
   const [questions, setQuestions] = useState(null);
+  const [settings, setSettings] = useState(null);
   const [started, setStarted] = useState(false);
   const [nameInput, setNameInput] = useState(studentName);
   const [answers, setAnswers] = useState({});
@@ -936,11 +1133,15 @@ function QuizScreen({ exam, subjectId, chapterId, studentName, setStudentName, o
   const [saveFailed, setSaveFailed] = useState(false);
   const [saveError, setSaveError] = useState("");
   const key = `questions:${exam.id}:${subjectId}:${chapterId}`;
+  const settingsKey = `settings:${exam.id}:${subjectId}:${chapterId}`;
   const [subjectName, setSubjectName] = useState(subjectId);
   const [chapterName, setChapterName] = useState(chapterId === "none" ? null : chapterId);
   useEffect(() => {
     (async () => setQuestions(await sGet(key, [])))();
   }, [key]);
+  useEffect(() => {
+    (async () => setSettings(await sGet(settingsKey, { timingMode: "off", totalSeconds: 600 })))();
+  }, [settingsKey]);
   useEffect(() => {
     (async () => {
       const subs = await sGet(`subjects:${exam.id}`, []);
@@ -985,7 +1186,7 @@ function QuizScreen({ exam, subjectId, chapterId, studentName, setStudentName, o
     setSaveError(res.error || "");
     setSaving(false);
   };
-  if (questions === null) return /* @__PURE__ */ jsx2(LoadingBlock, {});
+  if (questions === null || settings === null) return /* @__PURE__ */ jsx2(LoadingBlock, {});
   if (questions.length === 0) {
     return /* @__PURE__ */ jsxs2("div", { children: [
       /* @__PURE__ */ jsx2(BackRow, { onBack, label: "Subjects" }),
@@ -1070,6 +1271,19 @@ function QuizScreen({ exam, subjectId, chapterId, studentName, setStudentName, o
     ] });
   }
   const answeredCount = Object.keys(answers).length;
+  if (settings.timingMode !== "off") {
+    return /* @__PURE__ */ jsx2(
+      TimedQuizRunner,
+      {
+        questions,
+        settings,
+        studentName,
+        answers,
+        setAnswers,
+        onSubmit: submitQuiz
+      }
+    );
+  }
   return /* @__PURE__ */ jsxs2("div", { children: [
     /* @__PURE__ */ jsxs2("div", { style: styles.quizProgress, children: [
       /* @__PURE__ */ jsx2("span", { children: studentName }),
@@ -1114,6 +1328,130 @@ function QuizScreen({ exam, subjectId, chapterId, studentName, setStudentName, o
       }
     ),
     answeredCount < questions.length && /* @__PURE__ */ jsx2("div", { style: styles.hint, children: "Answer every question to submit." })
+  ] });
+}
+function TimedQuizRunner({ questions, settings, studentName, answers, setAnswers, onSubmit }) {
+  const [index, setIndex] = useState(0);
+  const isPer = settings.timingMode === "per";
+  const q = questions[index];
+  const isLast = index === questions.length - 1;
+  const perDuration = isPer ? q.timeSeconds || 60 : null;
+  const [secondsLeft, setSecondsLeft] = useState(isPer ? perDuration : settings.totalSeconds);
+  const submittedRef = useRef(false);
+  const onSubmitRef = useRef(onSubmit);
+  useEffect(() => {
+    onSubmitRef.current = onSubmit;
+  }, [onSubmit]);
+  useEffect(() => {
+    if (!isPer) return;
+    setSecondsLeft(q.timeSeconds || 60);
+    const interval = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(interval);
+          if (index < questions.length - 1) {
+            setIndex((i) => i + 1);
+          } else if (!submittedRef.current) {
+            submittedRef.current = true;
+            onSubmitRef.current();
+          }
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1e3);
+    return () => clearInterval(interval);
+  }, [isPer, index]);
+  useEffect(() => {
+    if (isPer) return;
+    const interval = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(interval);
+          if (!submittedRef.current) {
+            submittedRef.current = true;
+            onSubmitRef.current();
+          }
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1e3);
+    return () => clearInterval(interval);
+  }, [isPer]);
+  const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  const duration = isPer ? perDuration : settings.totalSeconds;
+  const pct = Math.max(0, Math.min(100, secondsLeft / duration * 100));
+  return /* @__PURE__ */ jsxs2("div", { children: [
+    /* @__PURE__ */ jsxs2("div", { style: styles.quizProgress, children: [
+      /* @__PURE__ */ jsx2("span", { children: studentName }),
+      /* @__PURE__ */ jsxs2("span", { children: [
+        "Question ",
+        index + 1,
+        " of ",
+        questions.length
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { style: styles.timerRow, children: [
+      /* @__PURE__ */ jsx2(Timer, { size: 14 }),
+      /* @__PURE__ */ jsx2("span", { style: styles.timerText, children: fmtTime(secondsLeft) }),
+      /* @__PURE__ */ jsx2("div", { style: styles.timerBarTrack, children: /* @__PURE__ */ jsx2("div", { style: { ...styles.timerBarFill, width: `${pct}%`, background: pct < 20 ? "var(--bad)" : "var(--gold)" } }) })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { style: styles.qCard, children: [
+      /* @__PURE__ */ jsx2("div", { style: styles.qCardHead, children: /* @__PURE__ */ jsxs2("span", { style: styles.qNum, children: [
+        "Q",
+        index + 1
+      ] }) }),
+      q.text && /* @__PURE__ */ jsx2("div", { style: styles.qText, children: q.text }),
+      q.image && /* @__PURE__ */ jsx2("img", { src: q.image, alt: "Question", style: styles.qImage }),
+      /* @__PURE__ */ jsx2("div", { style: styles.optList, children: q.options.map((o, oi) => /* @__PURE__ */ jsxs2(
+        "button",
+        {
+          style: { ...styles.optButton, ...answers[q.id] === oi ? styles.optButtonActive : {} },
+          onClick: () => setAnswers({ ...answers, [q.id]: oi }),
+          children: [
+            /* @__PURE__ */ jsx2("span", { style: styles.optLetter, children: String.fromCharCode(65 + oi) }),
+            o.image && /* @__PURE__ */ jsx2("img", { src: o.image, alt: "", style: styles.optThumb }),
+            o.text
+          ]
+        },
+        oi
+      )) })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { style: styles.formRow, children: [
+      !isPer && index > 0 && /* @__PURE__ */ jsxs2("button", { style: styles.ghostBtn, onClick: () => setIndex(index - 1), children: [
+        /* @__PURE__ */ jsx2(ArrowLeft, { size: 14 }),
+        " Previous"
+      ] }),
+      !isLast ? /* @__PURE__ */ jsxs2("button", { style: { ...styles.primaryBtn, flex: 1, justifyContent: "center" }, onClick: () => setIndex(index + 1), children: [
+        "Next ",
+        /* @__PURE__ */ jsx2(ChevronRight, { size: 15 })
+      ] }) : /* @__PURE__ */ jsxs2(
+        "button",
+        {
+          style: { ...styles.primaryBtn, flex: 1, justifyContent: "center" },
+          onClick: () => {
+            submittedRef.current = true;
+            onSubmitRef.current();
+          },
+          children: [
+            /* @__PURE__ */ jsx2(Stamp, { size: 15 }),
+            " Submit answers"
+          ]
+        }
+      )
+    ] }),
+    !isPer && !isLast && /* @__PURE__ */ jsx2(
+      "button",
+      {
+        style: { ...styles.ghostBtn, marginTop: 8, width: "100%", justifyContent: "center" },
+        onClick: () => {
+          submittedRef.current = true;
+          onSubmitRef.current();
+        },
+        children: "Submit now"
+      }
+    )
   ] });
 }
 function ResultCard({ score, total, saving, saveFailed, saveError }) {
@@ -1407,6 +1745,12 @@ var FONT_IMPORT = `
 * { box-sizing: border-box; }
 input, textarea, button { font-family: 'IBM Plex Sans', sans-serif; }
 ::placeholder { color: var(--ink-3); }
+@media print {
+  body * { visibility: hidden; }
+  .pracox-print-layer, .pracox-print-layer * { visibility: visible; }
+  .pracox-print-layer { position: absolute !important; left: 0; top: 0; width: 100%; }
+  .pracox-print-layer .no-print { display: none !important; }
+}
 `;
 var styles = {
   app: {
@@ -1448,6 +1792,36 @@ var styles = {
     borderRadius: 999,
     color: "var(--ink-2)",
     cursor: "pointer"
+  },
+  menuBackdrop: { position: "fixed", inset: 0, zIndex: 40 },
+  menuPanel: {
+    position: "absolute",
+    top: 40,
+    right: 0,
+    zIndex: 41,
+    background: "var(--paper-card)",
+    border: "1px solid var(--rule)",
+    borderRadius: 10,
+    boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+    padding: 6,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    minWidth: 200
+  },
+  menuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    background: "transparent",
+    border: "none",
+    padding: "9px 10px",
+    borderRadius: 7,
+    fontSize: 13,
+    color: "var(--ink)",
+    cursor: "pointer",
+    textAlign: "left",
+    width: "100%"
   },
   modeSwitch: { display: "flex", background: "var(--paper)", borderRadius: 999, padding: 3, border: "1px solid var(--rule)" },
   modeBtn: {
@@ -1745,6 +2119,39 @@ var styles = {
     fontSize: 12,
     fontWeight: 500
   },
+  radioRow: { display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" },
+  radioTitle: { fontSize: 13.5, fontWeight: 600, color: "var(--ink)" },
+  radioSub: { fontSize: 12, color: "var(--ink-3)", marginTop: 2, lineHeight: 1.4 },
+  modalBackdrop: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(22,35,63,0.45)",
+    zIndex: 60,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20
+  },
+  modalCard: {
+    background: "var(--paper-card)",
+    borderRadius: 14,
+    padding: 20,
+    maxWidth: 380,
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+  printLayer: {
+    position: "fixed",
+    inset: 0,
+    background: "#fff",
+    color: "#111",
+    zIndex: 70,
+    overflow: "auto",
+    padding: 24,
+    fontFamily: "'IBM Plex Sans', sans-serif"
+  },
   qImage: { width: "100%", maxHeight: 220, objectFit: "contain", borderRadius: 8, background: "var(--paper)", marginBottom: 10, border: "1px solid var(--rule)" },
   explanationNote: {
     marginTop: 10,
@@ -1793,6 +2200,32 @@ var styles = {
     color: "var(--ink-3)",
     marginBottom: 12,
     padding: "0 2px"
+  },
+  timerRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 14,
+    padding: "0 2px"
+  },
+  timerText: {
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: 13,
+    fontWeight: 600,
+    color: "var(--ink)",
+    minWidth: 40
+  },
+  timerBarTrack: {
+    flex: 1,
+    height: 6,
+    borderRadius: 999,
+    background: "var(--rule)",
+    overflow: "hidden"
+  },
+  timerBarFill: {
+    height: "100%",
+    borderRadius: 999,
+    transition: "width 1s linear"
   },
   resultCard: {
     background: "var(--paper-card)",
