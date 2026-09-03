@@ -1,5 +1,5 @@
 // app.jsx
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 
 // icons.jsx
 import { jsx, jsxs } from "react/jsx-runtime";
@@ -121,6 +121,63 @@ var Timer = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
   /* @__PURE__ */ jsx("line", { x1: "12", y1: "4", x2: "12", y2: "7" }),
   /* @__PURE__ */ jsx("circle", { cx: "12", cy: "13", r: "8" })
 ] });
+var Calculator = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("rect", { x: "4", y: "2", width: "16", height: "20", rx: "2" }),
+  /* @__PURE__ */ jsx("line", { x1: "8", y1: "6", x2: "16", y2: "6" }),
+  /* @__PURE__ */ jsx("line", { x1: "8", y1: "11", x2: "8", y2: "11.01" }),
+  /* @__PURE__ */ jsx("line", { x1: "12", y1: "11", x2: "12", y2: "11.01" }),
+  /* @__PURE__ */ jsx("line", { x1: "16", y1: "11", x2: "16", y2: "11.01" }),
+  /* @__PURE__ */ jsx("line", { x1: "8", y1: "15", x2: "8", y2: "15.01" }),
+  /* @__PURE__ */ jsx("line", { x1: "12", y1: "15", x2: "12", y2: "15.01" }),
+  /* @__PURE__ */ jsx("line", { x1: "16", y1: "15", x2: "16", y2: "18" }),
+  /* @__PURE__ */ jsx("line", { x1: "8", y1: "19", x2: "12", y2: "19" })
+] });
+var Flask = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("path", { d: "M9 3 h6 M10 3 v6 l-5 9 a2 2 0 0 0 2 3 h10 a2 2 0 0 0 2 -3 l-5 -9 V3" }),
+  /* @__PURE__ */ jsx("line", { x1: "7.5", y1: "14", x2: "16.5", y2: "14" })
+] });
+var Globe = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "10" }),
+  /* @__PURE__ */ jsx("line", { x1: "2", y1: "12", x2: "22", y2: "12" }),
+  /* @__PURE__ */ jsx("path", { d: "M12 2 a15 15 0 0 1 0 20 a15 15 0 0 1 0 -20" })
+] });
+var Atom = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "1.5" }),
+  /* @__PURE__ */ jsx("ellipse", { cx: "12", cy: "12", rx: "10", ry: "4.2" }),
+  /* @__PURE__ */ jsx("ellipse", { cx: "12", cy: "12", rx: "10", ry: "4.2", transform: "rotate(60 12 12)" }),
+  /* @__PURE__ */ jsx("ellipse", { cx: "12", cy: "12", rx: "10", ry: "4.2", transform: "rotate(120 12 12)" })
+] });
+var Landmark = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("line", { x1: "3", y1: "21", x2: "21", y2: "21" }),
+  /* @__PURE__ */ jsx("line", { x1: "5", y1: "21", x2: "5", y2: "10" }),
+  /* @__PURE__ */ jsx("line", { x1: "19", y1: "21", x2: "19", y2: "10" }),
+  /* @__PURE__ */ jsx("line", { x1: "12", y1: "21", x2: "12", y2: "10" }),
+  /* @__PURE__ */ jsx("polygon", { points: "12 3 21 9 3 9" })
+] });
+var Palette = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("path", { d: "M12 2 a10 10 0 1 0 0 20 c1.5 0 2 -1 2 -2 c0 -1 -1 -1.5 -1 -2.5 c0 -1 1 -1.5 2 -1.5 h2 a4 4 0 0 0 4 -4 c0 -6 -4 -10 -9 -10 Z" }),
+  /* @__PURE__ */ jsx("circle", { cx: "7.5", cy: "10.5", r: "1.2" }),
+  /* @__PURE__ */ jsx("circle", { cx: "10.5", cy: "7", r: "1.2" }),
+  /* @__PURE__ */ jsx("circle", { cx: "15", cy: "8", r: "1.2" })
+] });
+var Music = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("path", { d: "M9 18 V4 l10 -2 V16" }),
+  /* @__PURE__ */ jsx("circle", { cx: "6", cy: "18", r: "3" }),
+  /* @__PURE__ */ jsx("circle", { cx: "16", cy: "16", r: "3" })
+] });
+var Sun = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "4.5" }),
+  /* @__PURE__ */ jsx("line", { x1: "12", y1: "1.5", x2: "12", y2: "4" }),
+  /* @__PURE__ */ jsx("line", { x1: "12", y1: "20", x2: "12", y2: "22.5" }),
+  /* @__PURE__ */ jsx("line", { x1: "4.2", y1: "4.2", x2: "6", y2: "6" }),
+  /* @__PURE__ */ jsx("line", { x1: "18", y1: "18", x2: "19.8", y2: "19.8" }),
+  /* @__PURE__ */ jsx("line", { x1: "1.5", y1: "12", x2: "4", y2: "12" }),
+  /* @__PURE__ */ jsx("line", { x1: "20", y1: "12", x2: "22.5", y2: "12" }),
+  /* @__PURE__ */ jsx("line", { x1: "4.2", y1: "19.8", x2: "6", y2: "18" }),
+  /* @__PURE__ */ jsx("line", { x1: "18", y1: "6", x2: "19.8", y2: "4.2" })
+] });
+var Moon = (p) => /* @__PURE__ */ jsx(Icon, { ...p, children: /* @__PURE__ */ jsx("path", { d: "M21 12.8 A9 9 0 1 1 11.2 3 A7 7 0 0 0 21 12.8 Z" }) });
+var Sparkle = (p) => /* @__PURE__ */ jsx(Icon, { ...p, children: /* @__PURE__ */ jsx("path", { d: "M12 2 L14 9 L21 11 L14 13 L12 21 L10 13 L3 11 L10 9 Z" }) });
 
 // app.jsx
 import { Fragment, jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
@@ -137,6 +194,25 @@ var OTHER_EXAMS = [
 var EXAMS = [...CLASS_EXAMS, ...OTHER_EXAMS];
 var GROUPS = ["Classes", "CM Kids", "Scholarship"];
 var uid = () => Math.random().toString(36).slice(2, 10);
+var SUBJECT_VISUALS = [
+  { keywords: ["math", "maths", "arithmetic", "algebra"], icon: Calculator, color: "#3F6FB0" },
+  { keywords: ["science", "physics", "chemistry"], icon: Flask, color: "#3F9E6E" },
+  { keywords: ["biology", "bio"], icon: Atom, color: "#4C9E3F" },
+  { keywords: ["social", "history", "civics", "geography", "gk", "general knowledge"], icon: Landmark, color: "#B97D22" },
+  { keywords: ["english", "hindi", "malayalam", "language", "literature"], icon: BookOpen, color: "#7A5FB5" },
+  { keywords: ["art", "drawing"], icon: Palette, color: "#C0567A" },
+  { keywords: ["music"], icon: Music, color: "#5F8FB5" },
+  { keywords: ["computer", "coding", "cs", "it"], icon: Atom, color: "#3F8F9E" },
+  { keywords: ["mat", "mental ability", "sat", "aptitude"], icon: Sparkle, color: "#B9932B" },
+  { keywords: ["geo"], icon: Globe, color: "#3F8F9E" }
+];
+function pickSubjectVisual(name) {
+  const lower = (name || "").toLowerCase();
+  for (const v of SUBJECT_VISUALS) {
+    if (v.keywords.some((k) => lower.includes(k))) return v;
+  }
+  return { icon: BookOpen, color: "var(--ink-3)" };
+}
 var APP_HINT = "If you're using the Claude mobile app, try opening this in a browser (claude.ai) instead \u2014 saving works more reliably there.";
 function readAndCompressImage(file, maxDim = 640, quality = 0.72) {
   return new Promise((resolve, reject) => {
@@ -208,6 +284,23 @@ function App() {
   const [toast, setToast] = useState(null);
   const [adminPin, setAdminPin] = useState(void 0);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem("pracox_theme") === "dark";
+    } catch {
+      return false;
+    }
+  });
+  const toggleDarkMode = () => {
+    setDarkMode((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem("pracox_theme", next ? "dark" : "light");
+      } catch {
+      }
+      return next;
+    });
+  };
   useEffect(() => {
     (async () => setAdminPin(await sGet("admin-settings:pin", null)))();
   }, []);
@@ -282,7 +375,7 @@ function App() {
     setVariant(v);
     setScreen(mode === "admin" ? "manage" : "quiz");
   };
-  return /* @__PURE__ */ jsxs2("div", { style: styles.app, children: [
+  return /* @__PURE__ */ jsxs2("div", { style: styles.app, "data-theme": darkMode ? "dark" : "light", children: [
     /* @__PURE__ */ jsx2("style", { children: FONT_IMPORT }),
     /* @__PURE__ */ jsx2(
       TopBar,
@@ -292,11 +385,13 @@ function App() {
         onHome: reset,
         onHistory: goHistory,
         onDiag: goDiag,
-        onSettings: goAdminSettings
+        onSettings: goAdminSettings,
+        darkMode,
+        onToggleDark: toggleDarkMode
       }
     ),
     /* @__PURE__ */ jsx2(Breadcrumb, { exam, subjectId, chapterId, onHome: reset, onExam: () => goSubjects(examId) }),
-    /* @__PURE__ */ jsxs2("main", { style: styles.main, children: [
+    /* @__PURE__ */ jsxs2("main", { style: styles.main, className: "px-fade-in", children: [
       screen === "home" && /* @__PURE__ */ jsx2(ExamGrid, { onPick: goSubjects }),
       screen === "history" && /* @__PURE__ */ jsx2(HistoryScreen, { initialName: studentName, onBack: reset }),
       screen === "diag" && /* @__PURE__ */ jsx2(DiagScreen, { onBack: reset }),
@@ -362,11 +457,11 @@ function App() {
           showToast
         }
       )
-    ] }),
+    ] }, screen + variant),
     toast && /* @__PURE__ */ jsx2("div", { style: { ...styles.toast, ...toast.kind === "error" ? styles.toastError : {} }, children: toast.msg })
   ] });
 }
-function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings }) {
+function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode, onToggleDark }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const close = () => setDrawerOpen(false);
   return /* @__PURE__ */ jsxs2("header", { style: styles.topbar, children: [
@@ -436,6 +531,13 @@ function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings }) {
               /* @__PURE__ */ jsx2(Bug, { size: 16 }),
               " Test storage connection"
             ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
+          /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: "Appearance" }),
+          /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: onToggleDark, children: [
+            darkMode ? /* @__PURE__ */ jsx2(Sun, { size: 16 }) : /* @__PURE__ */ jsx2(Moon, { size: 16 }),
+            darkMode ? "Switch to light mode" : "Switch to dark mode"
           ] })
         ] })
       ] })
@@ -516,17 +618,22 @@ function SubjectScreen({ exam, mode, onBack, onPick, showToast }) {
     /* @__PURE__ */ jsx2(BackRow, { onBack, label: "All exams" }),
     /* @__PURE__ */ jsx2(SectionHeading, { eyebrow: "Step 2", title: `${exam.label} \u2014 choose a subject` }),
     subjects.length === 0 && mode === "student" && /* @__PURE__ */ jsx2(EmptyState, { icon: /* @__PURE__ */ jsx2(BookOpen, { size: 22 }), text: "No subjects have been added for this exam yet." }),
-    /* @__PURE__ */ jsx2("div", { style: styles.grid, children: subjects.map((s) => /* @__PURE__ */ jsxs2("div", { style: styles.subjectCard, children: [
-      /* @__PURE__ */ jsxs2("button", { style: styles.subjectCardMain, onClick: () => onPick(s), children: [
-        /* @__PURE__ */ jsx2("span", { style: styles.subjectCardLabel, children: s.name }),
-        /* @__PURE__ */ jsx2("span", { style: styles.subjectCardMeta, children: s.hasChapters ? /* @__PURE__ */ jsxs2(Fragment, { children: [
-          /* @__PURE__ */ jsx2(Layers, { size: 12 }),
-          " has chapters"
-        ] }) : "no chapters" }),
-        /* @__PURE__ */ jsx2(ChevronRight, { size: 16, color: "var(--ink-3)" })
-      ] }),
-      mode === "admin" && /* @__PURE__ */ jsx2("button", { style: styles.iconDangerBtn, onClick: () => removeSubject(s.id), title: "Remove subject", children: /* @__PURE__ */ jsx2(Trash2, { size: 14 }) })
-    ] }, s.id)) }),
+    /* @__PURE__ */ jsx2("div", { style: styles.grid, children: subjects.map((s) => {
+      const visual = pickSubjectVisual(s.name);
+      const VIcon = visual.icon;
+      return /* @__PURE__ */ jsxs2("div", { style: styles.subjectCard, children: [
+        /* @__PURE__ */ jsxs2("button", { style: styles.subjectCardMain, onClick: () => onPick(s), children: [
+          /* @__PURE__ */ jsx2("div", { style: { ...styles.subjectIconWrap, background: visual.color + "1E", color: visual.color }, children: /* @__PURE__ */ jsx2(VIcon, { size: 18 }) }),
+          /* @__PURE__ */ jsx2("span", { style: styles.subjectCardLabel, children: s.name }),
+          /* @__PURE__ */ jsx2("span", { style: styles.subjectCardMeta, children: s.hasChapters ? /* @__PURE__ */ jsxs2(Fragment, { children: [
+            /* @__PURE__ */ jsx2(Layers, { size: 12 }),
+            " has chapters"
+          ] }) : "no chapters" }),
+          /* @__PURE__ */ jsx2(ChevronRight, { size: 16, color: "var(--ink-3)" })
+        ] }),
+        mode === "admin" && /* @__PURE__ */ jsx2("button", { style: styles.iconDangerBtn, onClick: () => removeSubject(s.id), title: "Remove subject", children: /* @__PURE__ */ jsx2(Trash2, { size: 14 }) })
+      ] }, s.id);
+    }) }),
     mode === "admin" && /* @__PURE__ */ jsx2("div", { style: styles.addPanel, children: !adding ? /* @__PURE__ */ jsxs2("button", { style: styles.addBtn, onClick: () => setAdding(true), children: [
       /* @__PURE__ */ jsx2(Plus, { size: 15 }),
       " Add subject"
@@ -1467,7 +1574,13 @@ function TimedQuizRunner({ questions, settings, studentName, answers, setAnswers
     /* @__PURE__ */ jsxs2("div", { style: styles.timerRow, children: [
       /* @__PURE__ */ jsx2(Timer, { size: 14 }),
       /* @__PURE__ */ jsx2("span", { style: styles.timerText, children: fmtTime(secondsLeft) }),
-      /* @__PURE__ */ jsx2("div", { style: styles.timerBarTrack, children: /* @__PURE__ */ jsx2("div", { style: { ...styles.timerBarFill, width: `${pct}%`, background: pct < 20 ? "var(--bad)" : "var(--gold)" } }) })
+      /* @__PURE__ */ jsx2("div", { style: styles.timerBarTrack, children: /* @__PURE__ */ jsx2(
+        "div",
+        {
+          className: pct < 20 ? "px-pulse" : "",
+          style: { ...styles.timerBarFill, width: `${pct}%`, background: pct < 20 ? "var(--bad)" : "var(--gold)" }
+        }
+      ) })
     ] }),
     /* @__PURE__ */ jsxs2("div", { style: styles.qCard, children: [
       /* @__PURE__ */ jsx2("div", { style: styles.qCardHead, children: /* @__PURE__ */ jsxs2("span", { style: styles.qNum, children: [
@@ -1526,15 +1639,65 @@ function TimedQuizRunner({ questions, settings, studentName, answers, setAnswers
     )
   ] });
 }
+var CONFETTI_COLORS = ["#E8A33D", "#3F8F5F", "#16233F", "#C1443D", "#5B8DEF"];
+function Confetti() {
+  const pieces = Array.from({ length: 28 }, (_, i) => ({
+    left: i * 37 % 100,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    delay: i % 10 * 0.12,
+    duration: 2.2 + i % 5 * 0.3,
+    size: 6 + i % 3 * 3
+  }));
+  return /* @__PURE__ */ jsx2("div", { style: styles.confettiWrap, children: pieces.map((p, i) => /* @__PURE__ */ jsx2(
+    "div",
+    {
+      className: "px-fall",
+      style: {
+        position: "absolute",
+        top: -20,
+        left: `${p.left}%`,
+        width: p.size,
+        height: p.size * 1.6,
+        background: p.color,
+        borderRadius: 2,
+        animationDelay: `${p.delay}s`,
+        animationDuration: `${p.duration}s`
+      }
+    },
+    i
+  )) });
+}
 function ResultCard({ score, total, saving, saveFailed, saveError }) {
   const pct = Math.round(score / total * 100);
+  const [displayScore, setDisplayScore] = useState(0);
+  useEffect(() => {
+    if (score === 0) {
+      setDisplayScore(0);
+      return;
+    }
+    const start = performance.now();
+    const dur = 700;
+    let raf;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / dur);
+      setDisplayScore(Math.round(t * score));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [score]);
   let note = "Result saved to your history.";
   if (saving) note = "Saving your result\u2026";
   else if (saveFailed) note = `Couldn't save: ${saveError}. ${APP_HINT}`;
-  return /* @__PURE__ */ jsxs2("div", { style: styles.resultCard, children: [
+  let band = "Keep practicing \u2014 you'll get there.";
+  if (pct >= 90) band = "Outstanding! \u{1F389}";
+  else if (pct >= 70) band = "Great work!";
+  else if (pct >= 50) band = "Good effort \u2014 keep going.";
+  return /* @__PURE__ */ jsxs2("div", { style: styles.resultCard, className: "px-pop", children: [
+    pct >= 80 && /* @__PURE__ */ jsx2(Confetti, {}),
     /* @__PURE__ */ jsx2("div", { style: styles.resultStamp, children: /* @__PURE__ */ jsx2(Award, { size: 26 }) }),
     /* @__PURE__ */ jsxs2("div", { style: styles.resultScore, children: [
-      score,
+      displayScore,
       /* @__PURE__ */ jsxs2("span", { style: styles.resultTotal, children: [
         "/",
         total
@@ -1544,7 +1707,90 @@ function ResultCard({ score, total, saving, saveFailed, saveError }) {
       pct,
       "% correct"
     ] }),
+    /* @__PURE__ */ jsx2("div", { style: styles.resultBand, children: band }),
     /* @__PURE__ */ jsx2("div", { style: { ...styles.resultNote, ...saveFailed ? { color: "var(--bad)" } : {} }, children: note })
+  ] });
+}
+function StatsPanel({ records }) {
+  const stats = useMemo(() => {
+    if (!records.length) return null;
+    const days = [...new Set(records.map((r) => new Date(r.date).toDateString()))].map((d) => new Date(d)).sort((a, b) => b - a);
+    let streak = 0;
+    if (days.length) {
+      const oneDay = 864e5;
+      let cursor = /* @__PURE__ */ new Date();
+      cursor.setHours(0, 0, 0, 0);
+      const mostRecent = new Date(days[0]);
+      mostRecent.setHours(0, 0, 0, 0);
+      if (cursor - mostRecent <= oneDay) {
+        cursor = mostRecent;
+        for (const d of days) {
+          const day = new Date(d);
+          day.setHours(0, 0, 0, 0);
+          if (day.getTime() === cursor.getTime()) {
+            streak++;
+            cursor = new Date(cursor.getTime() - oneDay);
+          } else break;
+        }
+      }
+    }
+    const bySubject = {};
+    records.forEach((r) => {
+      const name = r.subjectName || r.subjectId || "Unknown";
+      if (!bySubject[name]) bySubject[name] = { correct: 0, total: 0 };
+      bySubject[name].correct += r.score;
+      bySubject[name].total += r.total;
+    });
+    const subjectAverages = Object.entries(bySubject).map(([name, v]) => ({
+      name,
+      pct: v.total ? Math.round(v.correct / v.total * 100) : 0
+    }));
+    subjectAverages.sort((a, b) => b.pct - a.pct);
+    const best = subjectAverages[0];
+    const weakest = subjectAverages.length > 1 ? subjectAverages[subjectAverages.length - 1] : null;
+    const recent = [...records].slice(0, 8).reverse().map((r) => ({
+      pct: r.total ? Math.round(r.score / r.total * 100) : 0
+    }));
+    return { streak, best, weakest, recent };
+  }, [records]);
+  if (!stats) return null;
+  return /* @__PURE__ */ jsxs2("div", { style: styles.statsCard, children: [
+    /* @__PURE__ */ jsxs2("div", { style: styles.statsRow, children: [
+      /* @__PURE__ */ jsxs2("div", { style: styles.statsBlock, children: [
+        /* @__PURE__ */ jsx2("div", { style: styles.statsNum, children: stats.streak }),
+        /* @__PURE__ */ jsx2("div", { style: styles.statsLabel, children: "day streak" })
+      ] }),
+      stats.best && /* @__PURE__ */ jsxs2("div", { style: styles.statsBlock, children: [
+        /* @__PURE__ */ jsxs2("div", { style: styles.statsNum, children: [
+          stats.best.pct,
+          "%"
+        ] }),
+        /* @__PURE__ */ jsxs2("div", { style: styles.statsLabel, children: [
+          "best: ",
+          stats.best.name
+        ] })
+      ] }),
+      stats.weakest && /* @__PURE__ */ jsxs2("div", { style: styles.statsBlock, children: [
+        /* @__PURE__ */ jsxs2("div", { style: styles.statsNum, children: [
+          stats.weakest.pct,
+          "%"
+        ] }),
+        /* @__PURE__ */ jsxs2("div", { style: styles.statsLabel, children: [
+          "focus: ",
+          stats.weakest.name
+        ] })
+      ] })
+    ] }),
+    stats.recent.length > 1 && /* @__PURE__ */ jsx2("div", { style: styles.trendRow, children: stats.recent.map((r, i) => /* @__PURE__ */ jsx2("div", { style: styles.trendBarTrack, children: /* @__PURE__ */ jsx2(
+      "div",
+      {
+        style: {
+          ...styles.trendBarFill,
+          height: `${Math.max(6, r.pct)}%`,
+          background: r.pct >= 70 ? "var(--good)" : r.pct >= 40 ? "var(--gold)" : "var(--bad)"
+        }
+      }
+    ) }, i)) })
   ] });
 }
 function HistoryScreen({ initialName, onBack }) {
@@ -1578,23 +1824,26 @@ function HistoryScreen({ initialName, onBack }) {
         /* @__PURE__ */ jsx2("button", { style: styles.primaryBtn, onClick: search, children: /* @__PURE__ */ jsx2(Search, { size: 14 }) })
       ] })
     ] }),
-    searched && records !== null && (records.length === 0 ? /* @__PURE__ */ jsx2("div", { style: { marginTop: 16 }, children: /* @__PURE__ */ jsx2(EmptyState, { icon: /* @__PURE__ */ jsx2(History, { size: 22 }), text: "No quiz attempts found for that name yet." }) }) : /* @__PURE__ */ jsx2("div", { style: { ...styles.qList, marginTop: 16 }, children: records.map((r) => /* @__PURE__ */ jsxs2("div", { style: styles.historyRow, children: [
-      /* @__PURE__ */ jsxs2("div", { children: [
-        /* @__PURE__ */ jsxs2("div", { style: styles.historyExam, children: [
-          r.examLabel,
-          " \xB7 ",
-          r.subjectName || r.subjectId,
-          r.chapterName ? ` \xB7 ${r.chapterName}` : "",
-          r.variantLabel ? ` \xB7 ${r.variantLabel}` : ""
+    searched && records !== null && (records.length === 0 ? /* @__PURE__ */ jsx2("div", { style: { marginTop: 16 }, children: /* @__PURE__ */ jsx2(EmptyState, { icon: /* @__PURE__ */ jsx2(History, { size: 22 }), text: "No quiz attempts found for that name yet." }) }) : /* @__PURE__ */ jsxs2(Fragment, { children: [
+      /* @__PURE__ */ jsx2(StatsPanel, { records }),
+      /* @__PURE__ */ jsx2("div", { style: { ...styles.qList, marginTop: 16 }, children: records.map((r) => /* @__PURE__ */ jsxs2("div", { style: styles.historyRow, children: [
+        /* @__PURE__ */ jsxs2("div", { children: [
+          /* @__PURE__ */ jsxs2("div", { style: styles.historyExam, children: [
+            r.examLabel,
+            " \xB7 ",
+            r.subjectName || r.subjectId,
+            r.chapterName ? ` \xB7 ${r.chapterName}` : "",
+            r.variantLabel ? ` \xB7 ${r.variantLabel}` : ""
+          ] }),
+          /* @__PURE__ */ jsx2("div", { style: styles.historyDate, children: new Date(r.date).toLocaleString() })
         ] }),
-        /* @__PURE__ */ jsx2("div", { style: styles.historyDate, children: new Date(r.date).toLocaleString() })
-      ] }),
-      /* @__PURE__ */ jsxs2("div", { style: styles.historyScore, children: [
-        r.score,
-        "/",
-        r.total
-      ] })
-    ] }, r.id)) }))
+        /* @__PURE__ */ jsxs2("div", { style: styles.historyScore, children: [
+          r.score,
+          "/",
+          r.total
+        ] })
+      ] }, r.id)) })
+    ] }))
   ] });
 }
 function DiagScreen({ onBack }) {
@@ -1788,19 +2037,54 @@ function BackRow({ onBack, label }) {
 }
 function EmptyState({ icon, text }) {
   return /* @__PURE__ */ jsxs2("div", { style: styles.empty, children: [
-    /* @__PURE__ */ jsx2("div", { style: styles.emptyIcon, children: icon }),
+    /* @__PURE__ */ jsx2(EmptyIllustration, {}),
     text
+  ] });
+}
+function EmptyIllustration() {
+  return /* @__PURE__ */ jsxs2("svg", { width: "88", height: "88", viewBox: "0 0 88 88", fill: "none", style: { animation: "pxFloat 3s ease-in-out infinite" }, children: [
+    /* @__PURE__ */ jsx2("rect", { x: "20", y: "14", width: "38", height: "50", rx: "4", stroke: "var(--ink-3)", strokeWidth: "2", fill: "var(--paper)" }),
+    /* @__PURE__ */ jsx2("line", { x1: "28", y1: "26", x2: "50", y2: "26", stroke: "var(--rule)", strokeWidth: "2.5", strokeLinecap: "round" }),
+    /* @__PURE__ */ jsx2("line", { x1: "28", y1: "34", x2: "50", y2: "34", stroke: "var(--rule)", strokeWidth: "2.5", strokeLinecap: "round" }),
+    /* @__PURE__ */ jsx2("line", { x1: "28", y1: "42", x2: "42", y2: "42", stroke: "var(--rule)", strokeWidth: "2.5", strokeLinecap: "round" }),
+    /* @__PURE__ */ jsx2("circle", { cx: "58", cy: "56", r: "12", stroke: "var(--gold)", strokeWidth: "3", fill: "var(--paper-card)" }),
+    /* @__PURE__ */ jsx2("line", { x1: "67", y1: "65", x2: "76", y2: "74", stroke: "var(--gold)", strokeWidth: "3.5", strokeLinecap: "round" })
   ] });
 }
 function LoadingBlock() {
   return /* @__PURE__ */ jsxs2("div", { style: styles.loading, children: [
-    /* @__PURE__ */ jsx2(Loader2, { size: 18, className: "spin", style: { animation: "spin 0.8s linear infinite" } }),
+    /* @__PURE__ */ jsx2("div", { style: { display: "flex", gap: 5 }, children: [0, 1, 2].map((i) => /* @__PURE__ */ jsx2(
+      "div",
+      {
+        style: {
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          background: "var(--gold)",
+          animation: "pxBounce 1.1s ease-in-out infinite",
+          animationDelay: `${i * 0.15}s`
+        }
+      },
+      i
+    )) }),
     "Loading\u2026"
   ] });
 }
 var FONT_IMPORT = `
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pxFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pxPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes pxPop { 0% { transform: scale(0.7); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes pxFall { from { transform: translateY(-10vh) rotate(0deg); opacity: 1; } to { transform: translateY(110vh) rotate(360deg); opacity: 0.9; } }
+@keyframes pxBounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.5; } 40% { transform: translateY(-7px); opacity: 1; } }
+@keyframes pxFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.px-fade-in { animation: pxFadeIn 0.28s ease; }
+.px-pulse { animation: pxPulse 1s ease-in-out infinite; }
+.px-pop { animation: pxPop 0.5s cubic-bezier(.2,1.4,.4,1); }
+.px-fall { animation: pxFall linear forwards; }
+button { transition: transform 0.1s ease, box-shadow 0.1s ease; }
+button:active { transform: scale(0.96); }
 :root {
   --ink: #16233F;
   --ink-2: #3C4A66;
@@ -1814,6 +2098,20 @@ var FONT_IMPORT = `
   --good-bg: #E6F4EB;
   --bad: #C1443D;
   --bad-bg: #FBEAE9;
+}
+[data-theme="dark"] {
+  --ink: #EDF1F8;
+  --ink-2: #C3CBDA;
+  --ink-3: #8994AC;
+  --paper: #0F1626;
+  --paper-card: #182238;
+  --rule: #2C3852;
+  --gold: #EFB65B;
+  --gold-dark: #F5C878;
+  --good: #5BC183;
+  --good-bg: #163524;
+  --bad: #E17870;
+  --bad-bg: #3B1A1B;
 }
 * { box-sizing: border-box; }
 input, textarea, button { font-family: 'IBM Plex Sans', sans-serif; }
@@ -2356,7 +2654,15 @@ var styles = {
     borderRadius: 14,
     padding: "26px 20px",
     textAlign: "center",
-    marginBottom: 18
+    marginBottom: 18,
+    position: "relative"
+  },
+  confettiWrap: {
+    position: "fixed",
+    inset: 0,
+    overflow: "hidden",
+    pointerEvents: "none",
+    zIndex: 50
   },
   resultStamp: {
     width: 48,
@@ -2372,7 +2678,30 @@ var styles = {
   resultScore: { fontFamily: "'Fraunces', serif", fontSize: 40, fontWeight: 700, color: "var(--ink)" },
   resultTotal: { fontSize: 20, color: "var(--ink-3)", fontWeight: 500 },
   resultPct: { fontSize: 13.5, color: "var(--ink-2)", marginTop: 2 },
+  resultBand: { fontSize: 13.5, fontWeight: 600, color: "var(--gold-dark)", marginTop: 6 },
   resultNote: { fontFamily: "'IBM Plex Mono', monospace", fontSize: 10.5, color: "var(--ink-3)", marginTop: 8 },
+  statsCard: {
+    background: "var(--paper-card)",
+    border: "1px solid var(--rule)",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16
+  },
+  statsRow: { display: "flex", gap: 18 },
+  statsBlock: { flex: 1, textAlign: "center" },
+  statsNum: { fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, color: "var(--ink)" },
+  statsLabel: { fontSize: 10.5, color: "var(--ink-3)", marginTop: 2, lineHeight: 1.3 },
+  trendRow: {
+    display: "flex",
+    alignItems: "flex-end",
+    gap: 6,
+    height: 56,
+    marginTop: 16,
+    borderTop: "1px solid var(--rule)",
+    paddingTop: 10
+  },
+  trendBarTrack: { flex: 1, height: "100%", display: "flex", alignItems: "flex-end" },
+  trendBarFill: { width: "100%", borderRadius: "3px 3px 0 0", transition: "height 0.4s ease" },
   historyRow: {
     display: "flex",
     alignItems: "center",
