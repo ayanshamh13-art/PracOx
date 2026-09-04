@@ -121,6 +121,11 @@ var Timer = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
   /* @__PURE__ */ jsx("line", { x1: "12", y1: "4", x2: "12", y2: "7" }),
   /* @__PURE__ */ jsx("circle", { cx: "12", cy: "13", r: "8" })
 ] });
+var Import = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
+  /* @__PURE__ */ jsx("path", { d: "M12 3 V15" }),
+  /* @__PURE__ */ jsx("polyline", { points: "7 10 12 15 17 10" }),
+  /* @__PURE__ */ jsx("path", { d: "M4 19 H20" })
+] });
 var Calculator = (p) => /* @__PURE__ */ jsxs(Icon, { ...p, children: [
   /* @__PURE__ */ jsx("rect", { x: "4", y: "2", width: "16", height: "20", rx: "2" }),
   /* @__PURE__ */ jsx("line", { x1: "8", y1: "6", x2: "16", y2: "6" }),
@@ -503,7 +508,7 @@ function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode
   return /* @__PURE__ */ jsxs2("header", { style: styles.topbar, children: [
     /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
       /* @__PURE__ */ jsx2("button", { style: styles.historyBtn, onClick: openDrawer, title: "Menu", children: /* @__PURE__ */ jsx2(Menu, { size: 18 }) }),
-      /* @__PURE__ */ jsxs2("div", { style: styles.brand, onClick: onHome, children: [
+      /* @__PURE__ */ jsxs2("div", { style: styles.brand, className: "px-tap", onClick: onHome, children: [
         /* @__PURE__ */ jsx2("div", { style: styles.brandMark, children: /* @__PURE__ */ jsx2("img", { src: LOGO_SRC, alt: "PracOx", style: styles.brandMarkImg }) }),
         /* @__PURE__ */ jsxs2("div", { children: [
           /* @__PURE__ */ jsx2("div", { style: styles.brandName, children: "PracOx" }),
@@ -537,7 +542,7 @@ function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode
           },
           children: [
             /* @__PURE__ */ jsxs2("div", { style: styles.drawerHead, children: [
-              /* @__PURE__ */ jsxs2("div", { style: styles.brand, onClick: () => {
+              /* @__PURE__ */ jsxs2("div", { style: styles.brand, className: "px-tap", onClick: () => {
                 close();
                 onHome();
               }, children: [
@@ -1119,6 +1124,7 @@ function ManageQuestions({ exam, subjectId, chapterId, variant, bankId, onBack, 
   const [bulkText, setBulkText] = useState("");
   const [totalSettings, setTotalSettings] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const key = `questions:${exam.id}:${subjectId}:${chapterId}:${variant}:${bankId}`;
   const settingsKey = `settings:${exam.id}:${subjectId}:${chapterId}:${variant}:${bankId}`;
   const variantMeta = VARIANTS.find((v) => v.id === variant);
@@ -1266,6 +1272,25 @@ function ManageQuestions({ exam, subjectId, chapterId, variant, bankId, onBack, 
       errors.length ? `Added ${parsed.length} question(s). ${errors.length} block(s) couldn't be read.` : `Added ${parsed.length} question(s).`
     );
   };
+  const importSelected = async (selectedQuestions) => {
+    const copies = selectedQuestions.map((q) => ({
+      ...q,
+      id: uid(),
+      options: q.options.map((o) => ({ ...o })),
+      timeSeconds: q.timeSeconds || 60
+    }));
+    const prev = questions;
+    const next = [...questions, ...copies];
+    setQuestions(next);
+    const res = await sSet(key, next);
+    if (!res.ok) {
+      setQuestions(prev);
+      showToast(`Save failed: ${res.error}. ${APP_HINT}`, "error");
+      return;
+    }
+    setImportOpen(false);
+    showToast(`Imported ${copies.length} question${copies.length === 1 ? "" : "s"}`);
+  };
   if (questions === null) return /* @__PURE__ */ jsx2(LoadingBlock, {});
   return /* @__PURE__ */ jsxs2("div", { children: [
     /* @__PURE__ */ jsx2(BackRow, { onBack, label: "Back" }),
@@ -1274,10 +1299,27 @@ function ManageQuestions({ exam, subjectId, chapterId, variant, bankId, onBack, 
       /* @__PURE__ */ jsx2(Printer, { size: 14 }),
       " Print / export PDF"
     ] }),
-    variant !== "off" && /* @__PURE__ */ jsxs2("div", { style: styles.printHint, children: [
-      /* @__PURE__ */ jsx2(Printer, { size: 13 }),
-      " PDF export uses the Non-timed question bank \u2014 switch to that option to print."
+    variant !== "off" && /* @__PURE__ */ jsxs2(Fragment, { children: [
+      /* @__PURE__ */ jsxs2("button", { style: { ...styles.ghostBtn, marginBottom: 10 }, onClick: () => setImportOpen(true), children: [
+        /* @__PURE__ */ jsx2(Import, { size: 14 }),
+        " Import from Non-timed"
+      ] }),
+      /* @__PURE__ */ jsxs2("div", { style: styles.printHint, children: [
+        /* @__PURE__ */ jsx2(Printer, { size: 13 }),
+        " PDF export uses the Non-timed question bank \u2014 switch to that option to print."
+      ] })
     ] }),
+    importOpen && /* @__PURE__ */ jsx2(
+      ImportModal,
+      {
+        exam,
+        subjectId,
+        chapterId,
+        onImport: importSelected,
+        onClose: () => setImportOpen(false),
+        showToast
+      }
+    ),
     printOpen && variant === "off" && /* @__PURE__ */ jsx2(
       PrintExportModal,
       {
@@ -1546,6 +1588,68 @@ function PrintExportModal({ questions, examLabel, onClose }) {
     ] }, q.id)),
     /* @__PURE__ */ jsx2("div", { className: "no-print", style: { marginTop: 20 }, children: /* @__PURE__ */ jsx2("button", { style: styles.ghostBtn, onClick: onClose, children: "Close print view" }) })
   ] });
+}
+function ImportModal({ exam, subjectId, chapterId, onImport, onClose, showToast }) {
+  const [banks, setBanks] = useState(null);
+  const [chosenBankId, setChosenBankId] = useState(null);
+  const [bankQuestions, setBankQuestions] = useState(null);
+  const [selected, setSelected] = useState({});
+  useEffect(() => {
+    (async () => {
+      setBanks(await sGet(`banks:${exam.id}:${subjectId}:${chapterId}:off`, []));
+    })();
+  }, [exam.id, subjectId, chapterId]);
+  const pickBank = async (bId) => {
+    setChosenBankId(bId);
+    setSelected({});
+    const list = await sGet(`questions:${exam.id}:${subjectId}:${chapterId}:off:${bId}`, []);
+    setBankQuestions(list);
+  };
+  const toggle = (id) => setSelected({ ...selected, [id]: !selected[id] });
+  const selectedCount = Object.values(selected).filter(Boolean).length;
+  const doImport = () => {
+    const chosen = bankQuestions.filter((q) => selected[q.id]);
+    if (chosen.length === 0) {
+      showToast("Select at least one question to import", "error");
+      return;
+    }
+    onImport(chosen);
+  };
+  return /* @__PURE__ */ jsx2("div", { style: styles.modalBackdrop, onClick: onClose, children: /* @__PURE__ */ jsx2("div", { style: { ...styles.modalCard, maxWidth: 460, maxHeight: "80vh", overflowY: "auto" }, onClick: (e) => e.stopPropagation(), children: !chosenBankId ? /* @__PURE__ */ jsxs2(Fragment, { children: [
+    /* @__PURE__ */ jsx2("div", { style: styles.fieldLabel, children: "Import from which Non-timed bank?" }),
+    banks === null ? /* @__PURE__ */ jsx2(LoadingBlock, {}) : banks.length === 0 ? /* @__PURE__ */ jsx2(EmptyState, { text: "No Non-timed banks exist yet to import from." }) : /* @__PURE__ */ jsx2("div", { style: { display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }, children: banks.map((b) => /* @__PURE__ */ jsx2("button", { style: styles.addBtn, onClick: () => pickBank(b.id), children: b.name }, b.id)) }),
+    /* @__PURE__ */ jsx2("button", { style: { ...styles.ghostBtn, marginTop: 12, width: "100%", justifyContent: "center" }, onClick: onClose, children: "Cancel" })
+  ] }) : bankQuestions === null ? /* @__PURE__ */ jsx2(LoadingBlock, {}) : bankQuestions.length === 0 ? /* @__PURE__ */ jsxs2(Fragment, { children: [
+    /* @__PURE__ */ jsx2(EmptyState, { text: "That bank has no questions to import." }),
+    /* @__PURE__ */ jsx2("button", { style: { ...styles.ghostBtn, marginTop: 12, width: "100%", justifyContent: "center" }, onClick: () => setChosenBankId(null), children: "Back" })
+  ] }) : /* @__PURE__ */ jsxs2(Fragment, { children: [
+    /* @__PURE__ */ jsxs2("div", { style: styles.fieldLabel, children: [
+      "Pick questions to import (",
+      selectedCount,
+      " selected)"
+    ] }),
+    /* @__PURE__ */ jsx2("div", { style: { display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }, children: bankQuestions.map((q, i) => /* @__PURE__ */ jsxs2("label", { style: styles.radioRow, children: [
+      /* @__PURE__ */ jsx2("input", { type: "checkbox", checked: !!selected[q.id], onChange: () => toggle(q.id) }),
+      /* @__PURE__ */ jsxs2("div", { children: [
+        /* @__PURE__ */ jsxs2("div", { style: styles.radioTitle, children: [
+          "Q",
+          i + 1,
+          ". ",
+          q.text || "(image question)"
+        ] }),
+        /* @__PURE__ */ jsx2("div", { style: styles.radioSub, children: q.options.map((o) => o.text).filter(Boolean).join(" \xB7 ") })
+      ] })
+    ] }, q.id)) }),
+    /* @__PURE__ */ jsxs2("div", { style: styles.formRow, children: [
+      /* @__PURE__ */ jsxs2("button", { style: styles.primaryBtn, onClick: doImport, children: [
+        /* @__PURE__ */ jsx2(Import, { size: 14 }),
+        " Import selected (",
+        selectedCount,
+        ")"
+      ] }),
+      /* @__PURE__ */ jsx2("button", { style: styles.ghostBtn, onClick: () => setChosenBankId(null), children: "Back" })
+    ] })
+  ] }) }) });
 }
 function QuizScreen({ exam, subjectId, chapterId, variant, bankId, studentName, setStudentName, onBack, showToast }) {
   const [questions, setQuestions] = useState(null);
@@ -2350,6 +2454,14 @@ var FONT_IMPORT = `
 .px-fall { animation: pxFall linear forwards; }
 button { transition: transform 0.1s ease, box-shadow 0.1s ease; }
 button:active { transform: scale(0.96); }
+* { -webkit-tap-highlight-color: transparent; }
+button, [role="button"], a { outline: none; }
+button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.px-tap { transition: transform 0.1s ease; }
+.px-tap:active { transform: scale(0.97); }
 :root {
   --ink: #16233F;
   --ink-2: #3C4A66;
