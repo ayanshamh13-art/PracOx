@@ -279,6 +279,7 @@ function App() {
   const [subjectId, setSubjectId] = useState(null);
   const [chapterId, setChapterId] = useState(null);
   const [variant, setVariant] = useState(null);
+  const [bankId, setBankId] = useState(null);
   const [screen, setScreen] = useState("home");
   const [studentName, setStudentName] = useState("");
   const [toast, setToast] = useState(null);
@@ -314,6 +315,7 @@ function App() {
     setSubjectId(null);
     setChapterId(null);
     setVariant(null);
+    setBankId(null);
     setScreen("home");
   };
   const goHistory = () => {
@@ -321,6 +323,7 @@ function App() {
     setSubjectId(null);
     setChapterId(null);
     setVariant(null);
+    setBankId(null);
     setScreen("history");
   };
   const goDiag = () => {
@@ -328,6 +331,7 @@ function App() {
     setSubjectId(null);
     setChapterId(null);
     setVariant(null);
+    setBankId(null);
     setScreen("diag");
   };
   const goAdminSettings = () => {
@@ -335,6 +339,7 @@ function App() {
     setSubjectId(null);
     setChapterId(null);
     setVariant(null);
+    setBankId(null);
     setScreen("admin-settings");
   };
   const requestMode = (m) => {
@@ -343,6 +348,7 @@ function App() {
       setSubjectId(null);
       setChapterId(null);
       setVariant(null);
+      setBankId(null);
       setScreen("admin-login");
       return;
     }
@@ -354,12 +360,14 @@ function App() {
     setSubjectId(null);
     setChapterId(null);
     setVariant(null);
+    setBankId(null);
     setScreen("subjects");
   };
   const goChapters = (subj) => {
     setSubjectId(subj.id);
     setChapterId(null);
     setVariant(null);
+    setBankId(null);
     if (subj.hasChapters) setScreen("chapters");
     else {
       setChapterId("none");
@@ -369,10 +377,16 @@ function App() {
   const goInto = (chapId) => {
     setChapterId(chapId);
     setVariant(null);
+    setBankId(null);
     setScreen("variant");
   };
   const goVariant = (v) => {
     setVariant(v);
+    setBankId(null);
+    setScreen("banks");
+  };
+  const goBank = (bId) => {
+    setBankId(bId);
     setScreen(mode === "admin" ? "manage" : "quiz");
   };
   return /* @__PURE__ */ jsxs2("div", { style: styles.app, "data-theme": darkMode ? "dark" : "light", children: [
@@ -433,40 +447,62 @@ function App() {
           onPick: goVariant
         }
       ),
-      screen === "manage" && exam && subjectId && chapterId && variant && /* @__PURE__ */ jsx2(
+      screen === "banks" && exam && subjectId && chapterId && variant && /* @__PURE__ */ jsx2(
+        BankScreen,
+        {
+          exam,
+          subjectId,
+          chapterId,
+          variant,
+          mode,
+          studentName,
+          setStudentName,
+          onBack: () => setScreen("variant"),
+          onPick: goBank,
+          showToast
+        }
+      ),
+      screen === "manage" && exam && subjectId && chapterId && variant && bankId && /* @__PURE__ */ jsx2(
         ManageQuestions,
         {
           exam,
           subjectId,
           chapterId,
           variant,
-          onBack: () => setScreen("variant"),
+          bankId,
+          onBack: () => setScreen("banks"),
           showToast
         }
       ),
-      screen === "quiz" && exam && subjectId && chapterId && variant && /* @__PURE__ */ jsx2(
+      screen === "quiz" && exam && subjectId && chapterId && variant && bankId && /* @__PURE__ */ jsx2(
         QuizScreen,
         {
           exam,
           subjectId,
           chapterId,
           variant,
+          bankId,
           studentName,
           setStudentName,
-          onBack: () => setScreen("variant"),
+          onBack: () => setScreen("banks"),
           showToast
         }
       )
-    ] }, screen + variant),
+    ] }, screen + variant + bankId),
     toast && /* @__PURE__ */ jsx2("div", { style: { ...styles.toast, ...toast.kind === "error" ? styles.toastError : {} }, children: toast.msg })
   ] });
 }
 function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode, onToggleDark }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerMounted, setDrawerMounted] = useState(false);
+  const openDrawer = () => {
+    setDrawerMounted(true);
+    requestAnimationFrame(() => setDrawerOpen(true));
+  };
   const close = () => setDrawerOpen(false);
   return /* @__PURE__ */ jsxs2("header", { style: styles.topbar, children: [
     /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
-      /* @__PURE__ */ jsx2("button", { style: styles.historyBtn, onClick: () => setDrawerOpen(true), title: "Menu", children: /* @__PURE__ */ jsx2(Menu, { size: 18 }) }),
+      /* @__PURE__ */ jsx2("button", { style: styles.historyBtn, onClick: openDrawer, title: "Menu", children: /* @__PURE__ */ jsx2(Menu, { size: 18 }) }),
       /* @__PURE__ */ jsxs2("div", { style: styles.brand, onClick: onHome, children: [
         /* @__PURE__ */ jsx2("div", { style: styles.brandMark, children: /* @__PURE__ */ jsx2("img", { src: LOGO_SRC, alt: "PracOx", style: styles.brandMarkImg }) }),
         /* @__PURE__ */ jsxs2("div", { children: [
@@ -475,72 +511,96 @@ function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode
         ] })
       ] })
     ] }),
-    drawerOpen && /* @__PURE__ */ jsxs2(Fragment, { children: [
-      /* @__PURE__ */ jsx2("div", { style: styles.drawerBackdrop, onClick: close }),
-      /* @__PURE__ */ jsxs2("div", { style: styles.drawerPanel, children: [
-        /* @__PURE__ */ jsxs2("div", { style: styles.drawerHead, children: [
-          /* @__PURE__ */ jsxs2("div", { style: styles.brand, onClick: () => {
-            close();
-            onHome();
-          }, children: [
-            /* @__PURE__ */ jsx2("div", { style: styles.brandMark, children: /* @__PURE__ */ jsx2("img", { src: LOGO_SRC, alt: "PracOx", style: styles.brandMarkImg }) }),
-            /* @__PURE__ */ jsxs2("div", { children: [
-              /* @__PURE__ */ jsx2("div", { style: styles.brandName, children: "PracOx" }),
-              /* @__PURE__ */ jsx2("div", { style: styles.brandSub, children: "Practice Through Failure" })
-            ] })
-          ] }),
-          /* @__PURE__ */ jsx2("button", { style: styles.iconGhostBtn, onClick: close, children: /* @__PURE__ */ jsx2(X, { size: 16 }) })
-        ] }),
-        /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
-          /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: "Mode" }),
-          mode === "student" ? /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
-            close();
-            setMode("admin");
-          }, children: [
-            /* @__PURE__ */ jsx2(Shield, { size: 16 }),
-            " Switch to Admin mode"
-          ] }) : /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
-            close();
-            setMode("student");
-          }, children: [
-            /* @__PURE__ */ jsx2(GraduationCap, { size: 16 }),
-            " Switch to Student mode"
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
-          /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: mode === "admin" ? "Admin" : "Student" }),
-          mode === "student" && /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
-            close();
-            onHistory();
-          }, children: [
-            /* @__PURE__ */ jsx2(History, { size: 16 }),
-            " My score history"
-          ] }),
-          mode === "admin" && /* @__PURE__ */ jsxs2(Fragment, { children: [
-            /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
-              close();
-              onSettings();
-            }, children: [
-              /* @__PURE__ */ jsx2(Settings, { size: 16 }),
-              " Admin PIN settings"
+    drawerMounted && /* @__PURE__ */ jsxs2(Fragment, { children: [
+      /* @__PURE__ */ jsx2(
+        "div",
+        {
+          style: {
+            ...styles.drawerBackdrop,
+            opacity: drawerOpen ? 1 : 0,
+            pointerEvents: drawerOpen ? "auto" : "none",
+            transition: "opacity 0.25s ease"
+          },
+          onClick: close,
+          onTransitionEnd: () => {
+            if (!drawerOpen) setDrawerMounted(false);
+          }
+        }
+      ),
+      /* @__PURE__ */ jsxs2(
+        "div",
+        {
+          style: {
+            ...styles.drawerPanel,
+            transform: drawerOpen ? "translateX(0)" : "translateX(-100%)",
+            transition: "transform 0.28s cubic-bezier(.2,.9,.3,1)"
+          },
+          children: [
+            /* @__PURE__ */ jsxs2("div", { style: styles.drawerHead, children: [
+              /* @__PURE__ */ jsxs2("div", { style: styles.brand, onClick: () => {
+                close();
+                onHome();
+              }, children: [
+                /* @__PURE__ */ jsx2("div", { style: styles.brandMark, children: /* @__PURE__ */ jsx2("img", { src: LOGO_SRC, alt: "PracOx", style: styles.brandMarkImg }) }),
+                /* @__PURE__ */ jsxs2("div", { children: [
+                  /* @__PURE__ */ jsx2("div", { style: styles.brandName, children: "PracOx" }),
+                  /* @__PURE__ */ jsx2("div", { style: styles.brandSub, children: "Practice Through Failure" })
+                ] })
+              ] }),
+              /* @__PURE__ */ jsx2("button", { style: styles.iconGhostBtn, onClick: close, children: /* @__PURE__ */ jsx2(X, { size: 16 }) })
             ] }),
-            /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
-              close();
-              onDiag();
-            }, children: [
-              /* @__PURE__ */ jsx2(Bug, { size: 16 }),
-              " Test storage connection"
+            /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
+              /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: "Mode" }),
+              mode === "student" ? /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
+                close();
+                setMode("admin");
+              }, children: [
+                /* @__PURE__ */ jsx2(Shield, { size: 16 }),
+                " Switch to Admin mode"
+              ] }) : /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
+                close();
+                setMode("student");
+              }, children: [
+                /* @__PURE__ */ jsx2(GraduationCap, { size: 16 }),
+                " Switch to Student mode"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
+              /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: mode === "admin" ? "Admin" : "Student" }),
+              mode === "student" && /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
+                close();
+                onHistory();
+              }, children: [
+                /* @__PURE__ */ jsx2(History, { size: 16 }),
+                " My score history"
+              ] }),
+              mode === "admin" && /* @__PURE__ */ jsxs2(Fragment, { children: [
+                /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
+                  close();
+                  onSettings();
+                }, children: [
+                  /* @__PURE__ */ jsx2(Settings, { size: 16 }),
+                  " Admin PIN settings"
+                ] }),
+                /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
+                  close();
+                  onDiag();
+                }, children: [
+                  /* @__PURE__ */ jsx2(Bug, { size: 16 }),
+                  " Test storage connection"
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
+              /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: "Appearance" }),
+              /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: onToggleDark, children: [
+                darkMode ? /* @__PURE__ */ jsx2(Sun, { size: 16 }) : /* @__PURE__ */ jsx2(Moon, { size: 16 }),
+                darkMode ? "Switch to light mode" : "Switch to dark mode"
+              ] })
             ] })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
-          /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: "Appearance" }),
-          /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: onToggleDark, children: [
-            darkMode ? /* @__PURE__ */ jsx2(Sun, { size: 16 }) : /* @__PURE__ */ jsx2(Moon, { size: 16 }),
-            darkMode ? "Switch to light mode" : "Switch to dark mode"
-          ] })
-        ] })
-      ] })
+          ]
+        }
+      )
     ] })
   ] });
 }
@@ -754,10 +814,17 @@ var VARIANTS = [
 function VariantScreen({ exam, subjectId, chapterId, mode, onBack, onPick }) {
   const [counts, setCounts] = useState(null);
   const load = useCallback(async () => {
-    const results = await Promise.all(
-      VARIANTS.map((v) => sGet(`questions:${exam.id}:${subjectId}:${chapterId}:${v.id}`, []))
+    const bankLists = await Promise.all(
+      VARIANTS.map((v) => sGet(`banks:${exam.id}:${subjectId}:${chapterId}:${v.id}`, []))
     );
-    setCounts(Object.fromEntries(VARIANTS.map((v, i) => [v.id, results[i].length])));
+    const questionCounts = await Promise.all(
+      bankLists.map(
+        (banks, i) => Promise.all(
+          banks.map((b) => sGet(`questions:${exam.id}:${subjectId}:${chapterId}:${VARIANTS[i].id}:${b.id}`, []))
+        ).then((lists) => lists.reduce((sum, l) => sum + l.length, 0))
+      )
+    );
+    setCounts(Object.fromEntries(VARIANTS.map((v, i) => [v.id, questionCounts[i]])));
   }, [exam.id, subjectId, chapterId]);
   useEffect(() => {
     load();
@@ -798,6 +865,185 @@ function VariantScreen({ exam, subjectId, chapterId, mode, onBack, onPick }) {
         v.id
       );
     }) })
+  ] });
+}
+function BankScreen({ exam, subjectId, chapterId, variant, mode, studentName, setStudentName, onBack, onPick, showToast }) {
+  const [banks, setBanks] = useState(null);
+  const [counts, setCounts] = useState({});
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState("");
+  const [nameInput, setNameInput] = useState(studentName || "");
+  const [doneMap, setDoneMap] = useState({});
+  const banksKey = `banks:${exam.id}:${subjectId}:${chapterId}:${variant}`;
+  const load = useCallback(async () => {
+    const list = await sGet(banksKey, []);
+    setBanks(list);
+    const qCounts = await Promise.all(
+      list.map((b) => sGet(`questions:${exam.id}:${subjectId}:${chapterId}:${variant}:${b.id}`, []))
+    );
+    setCounts(Object.fromEntries(list.map((b, i) => [b.id, qCounts[i].length])));
+  }, [banksKey, exam.id, subjectId, chapterId, variant]);
+  useEffect(() => {
+    load();
+  }, [load]);
+  const loadDoneStatus = useCallback(async (nm, bankList) => {
+    const trimmed = nm.trim().toLowerCase();
+    if (!trimmed || !bankList.length) {
+      setDoneMap({});
+      return;
+    }
+    const history = await sGet(`scores:${trimmed}`, []);
+    const results = await Promise.all(
+      bankList.map(async (b) => {
+        const overrideKey = `bank-done:${trimmed}:${exam.id}:${subjectId}:${chapterId}:${variant}:${b.id}`;
+        try {
+          const r = await window.storage.get(overrideKey, true);
+          return [b.id, JSON.parse(r.value)];
+        } catch {
+          const auto = history.some((h) => h.bankId === b.id && h.variantLabel);
+          return [b.id, auto];
+        }
+      })
+    );
+    setDoneMap(Object.fromEntries(results));
+  }, [exam.id, subjectId, chapterId, variant]);
+  useEffect(() => {
+    if (mode === "student" && banks) loadDoneStatus(nameInput, banks);
+  }, [banks, mode]);
+  const toggleDone = async (bankId, current) => {
+    const trimmed = nameInput.trim().toLowerCase();
+    if (!trimmed) {
+      showToast("Enter your name first to track completed banks", "error");
+      return;
+    }
+    setDoneMap({ ...doneMap, [bankId]: !current });
+    const overrideKey = `bank-done:${trimmed}:${exam.id}:${subjectId}:${chapterId}:${variant}:${bankId}`;
+    const res = await sSet(overrideKey, !current);
+    if (!res.ok) {
+      setDoneMap({ ...doneMap, [bankId]: current });
+      showToast(`Couldn't save: ${res.error}`, "error");
+    }
+  };
+  const addBank = async () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (banks.some((b) => b.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast("A bank with that name already exists", "error");
+      return;
+    }
+    const prev = banks;
+    const next = [...banks, { id: uid(), name: trimmed }];
+    setBanks(next);
+    const res = await sSet(banksKey, next);
+    if (!res.ok) {
+      setBanks(prev);
+      showToast(`Save failed: ${res.error}. ${APP_HINT}`, "error");
+      return;
+    }
+    setName("");
+    setAdding(false);
+    showToast("Bank added");
+  };
+  const removeBank = async (bankId) => {
+    const prev = banks;
+    const next = banks.filter((b) => b.id !== bankId);
+    setBanks(next);
+    const res = await sSet(banksKey, next);
+    if (!res.ok) {
+      setBanks(prev);
+      showToast(`Remove failed: ${res.error}. ${APP_HINT}`, "error");
+    }
+  };
+  if (banks === null) return /* @__PURE__ */ jsx2(LoadingBlock, {});
+  const variantMeta = VARIANTS.find((v) => v.id === variant);
+  return /* @__PURE__ */ jsxs2("div", { children: [
+    /* @__PURE__ */ jsx2(BackRow, { onBack, label: "Back" }),
+    /* @__PURE__ */ jsx2(
+      SectionHeading,
+      {
+        eyebrow: "Step 5",
+        title: `${variantMeta.label} \u2014 choose a bank`,
+        sub: mode === "admin" ? "Pick which bank to add questions to, or create a new one." : "Pick a set of questions to take."
+      }
+    ),
+    mode === "student" && /* @__PURE__ */ jsxs2("div", { style: { ...styles.startCard, marginBottom: 14 }, children: [
+      /* @__PURE__ */ jsx2("label", { style: styles.fieldLabel, children: "Your name" }),
+      /* @__PURE__ */ jsx2(
+        "input",
+        {
+          style: styles.input,
+          value: nameInput,
+          onChange: (e) => setNameInput(e.target.value),
+          onBlur: () => {
+            setStudentName(nameInput);
+            loadDoneStatus(nameInput, banks);
+          },
+          placeholder: "Enter your name to track completed banks"
+        }
+      )
+    ] }),
+    banks.length === 0 && mode === "student" && /* @__PURE__ */ jsx2(EmptyState, { text: "No banks have been added for this option yet." }),
+    /* @__PURE__ */ jsx2("div", { style: styles.grid, children: banks.map((b) => {
+      const count = counts[b.id] || 0;
+      const disabled = mode === "student" && count === 0;
+      const done = !!doneMap[b.id];
+      return /* @__PURE__ */ jsxs2("div", { style: styles.subjectCard, children: [
+        /* @__PURE__ */ jsxs2(
+          "button",
+          {
+            style: { ...styles.subjectCardMain, ...disabled ? styles.variantCardDisabled : {} },
+            onClick: () => !disabled && onPick(b.id),
+            disabled,
+            children: [
+              /* @__PURE__ */ jsx2("span", { style: styles.subjectCardLabel, children: b.name }),
+              /* @__PURE__ */ jsxs2("span", { style: styles.subjectCardMeta, children: [
+                count,
+                " question",
+                count === 1 ? "" : "s",
+                disabled ? " \xB7 empty" : ""
+              ] }),
+              /* @__PURE__ */ jsx2(ChevronRight, { size: 16, color: "var(--ink-3)" })
+            ]
+          }
+        ),
+        mode === "student" && count > 0 && /* @__PURE__ */ jsx2(
+          "button",
+          {
+            style: { ...styles.iconDangerBtn, ...done ? styles.doneToggleActive : styles.doneToggleBtn },
+            onClick: (e) => {
+              e.stopPropagation();
+              toggleDone(b.id, done);
+            },
+            title: done ? "Marked done \u2014 tap to unmark" : "Mark as done",
+            children: /* @__PURE__ */ jsx2(Check, { size: 14 })
+          }
+        ),
+        mode === "admin" && /* @__PURE__ */ jsx2("button", { style: styles.iconDangerBtn, onClick: () => removeBank(b.id), title: "Remove bank", children: /* @__PURE__ */ jsx2(Trash2, { size: 14 }) })
+      ] }, b.id);
+    }) }),
+    mode === "admin" && /* @__PURE__ */ jsx2("div", { style: styles.addPanel, children: !adding ? /* @__PURE__ */ jsxs2("button", { style: styles.addBtn, onClick: () => setAdding(true), children: [
+      /* @__PURE__ */ jsx2(Plus, { size: 15 }),
+      " Add bank"
+    ] }) : /* @__PURE__ */ jsxs2("div", { style: styles.addForm, children: [
+      /* @__PURE__ */ jsx2(
+        "input",
+        {
+          autoFocus: true,
+          style: styles.input,
+          placeholder: "Bank name, e.g. Bank 1",
+          value: name,
+          onChange: (e) => setName(e.target.value),
+          onKeyDown: (e) => e.key === "Enter" && addBank()
+        }
+      ),
+      /* @__PURE__ */ jsxs2("div", { style: styles.formRow, children: [
+        /* @__PURE__ */ jsx2("button", { style: styles.primaryBtn, onClick: addBank, children: "Save" }),
+        /* @__PURE__ */ jsx2("button", { style: styles.ghostBtn, onClick: () => {
+          setAdding(false);
+          setName("");
+        }, children: "Cancel" })
+      ] })
+    ] }) })
   ] });
 }
 function AutoTextarea({ style, minRows = 2, value, ...rest }) {
@@ -865,7 +1111,7 @@ var BLANK_Q = () => ({
   explanation: "",
   timeSeconds: 60
 });
-function ManageQuestions({ exam, subjectId, chapterId, variant, onBack, showToast }) {
+function ManageQuestions({ exam, subjectId, chapterId, variant, bankId, onBack, showToast }) {
   const [questions, setQuestions] = useState(null);
   const [tab, setTab] = useState("list");
   const [draft, setDraft] = useState(BLANK_Q());
@@ -873,9 +1119,17 @@ function ManageQuestions({ exam, subjectId, chapterId, variant, onBack, showToas
   const [bulkText, setBulkText] = useState("");
   const [totalSettings, setTotalSettings] = useState(null);
   const [printOpen, setPrintOpen] = useState(false);
-  const key = `questions:${exam.id}:${subjectId}:${chapterId}:${variant}`;
-  const settingsKey = `settings:${exam.id}:${subjectId}:${chapterId}:total`;
+  const key = `questions:${exam.id}:${subjectId}:${chapterId}:${variant}:${bankId}`;
+  const settingsKey = `settings:${exam.id}:${subjectId}:${chapterId}:${variant}:${bankId}`;
   const variantMeta = VARIANTS.find((v) => v.id === variant);
+  const [bankName, setBankName] = useState(bankId);
+  useEffect(() => {
+    (async () => {
+      const banks = await sGet(`banks:${exam.id}:${subjectId}:${chapterId}:${variant}`, []);
+      const b = banks.find((bk) => bk.id === bankId);
+      if (b) setBankName(b.name);
+    })();
+  }, [exam.id, subjectId, chapterId, variant, bankId]);
   const load = useCallback(async () => {
     setQuestions(await sGet(key, []));
   }, [key]);
@@ -1015,7 +1269,7 @@ function ManageQuestions({ exam, subjectId, chapterId, variant, onBack, showToas
   if (questions === null) return /* @__PURE__ */ jsx2(LoadingBlock, {});
   return /* @__PURE__ */ jsxs2("div", { children: [
     /* @__PURE__ */ jsx2(BackRow, { onBack, label: "Back" }),
-    /* @__PURE__ */ jsx2(SectionHeading, { eyebrow: "Admin", title: `Manage questions \u2014 ${variantMeta.label}`, sub: `${questions.length} question${questions.length === 1 ? "" : "s"} saved here` }),
+    /* @__PURE__ */ jsx2(SectionHeading, { eyebrow: "Admin", title: `${variantMeta.label} \u2014 ${bankName}`, sub: `${questions.length} question${questions.length === 1 ? "" : "s"} saved here` }),
     variant === "off" && questions.length > 0 && /* @__PURE__ */ jsxs2("button", { style: { ...styles.ghostBtn, marginBottom: 14 }, onClick: () => setPrintOpen(true), children: [
       /* @__PURE__ */ jsx2(Printer, { size: 14 }),
       " Print / export PDF"
@@ -1293,7 +1547,7 @@ function PrintExportModal({ questions, examLabel, onClose }) {
     /* @__PURE__ */ jsx2("div", { className: "no-print", style: { marginTop: 20 }, children: /* @__PURE__ */ jsx2("button", { style: styles.ghostBtn, onClick: onClose, children: "Close print view" }) })
   ] });
 }
-function QuizScreen({ exam, subjectId, chapterId, variant, studentName, setStudentName, onBack, showToast }) {
+function QuizScreen({ exam, subjectId, chapterId, variant, bankId, studentName, setStudentName, onBack, showToast }) {
   const [questions, setQuestions] = useState(null);
   const [totalSeconds, setTotalSeconds] = useState(null);
   const [started, setStarted] = useState(false);
@@ -1303,13 +1557,21 @@ function QuizScreen({ exam, subjectId, chapterId, variant, studentName, setStude
   const [saving, setSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const [saveError, setSaveError] = useState("");
-  const key = `questions:${exam.id}:${subjectId}:${chapterId}:${variant}`;
-  const settingsKey = `settings:${exam.id}:${subjectId}:${chapterId}:total`;
+  const key = `questions:${exam.id}:${subjectId}:${chapterId}:${variant}:${bankId}`;
+  const settingsKey = `settings:${exam.id}:${subjectId}:${chapterId}:${variant}:${bankId}`;
   const [subjectName, setSubjectName] = useState(subjectId);
   const [chapterName, setChapterName] = useState(chapterId === "none" ? null : chapterId);
+  const [bankName, setBankName] = useState(bankId);
   useEffect(() => {
     (async () => setQuestions(await sGet(key, [])))();
   }, [key]);
+  useEffect(() => {
+    (async () => {
+      const banks = await sGet(`banks:${exam.id}:${subjectId}:${chapterId}:${variant}`, []);
+      const b = banks.find((bk) => bk.id === bankId);
+      if (b) setBankName(b.name);
+    })();
+  }, [exam.id, subjectId, chapterId, variant, bankId]);
   useEffect(() => {
     (async () => {
       if (variant !== "total") {
@@ -1357,6 +1619,8 @@ function QuizScreen({ exam, subjectId, chapterId, variant, studentName, setStude
       chapterId,
       chapterName,
       variantLabel: (VARIANTS.find((v) => v.id === variant) || {}).label || variant,
+      bankId,
+      bankName,
       score: finalScore,
       total: questions.length
     };
@@ -1833,7 +2097,8 @@ function HistoryScreen({ initialName, onBack }) {
             " \xB7 ",
             r.subjectName || r.subjectId,
             r.chapterName ? ` \xB7 ${r.chapterName}` : "",
-            r.variantLabel ? ` \xB7 ${r.variantLabel}` : ""
+            r.variantLabel ? ` \xB7 ${r.variantLabel}` : "",
+            r.bankName ? ` \xB7 ${r.bankName}` : ""
           ] }),
           /* @__PURE__ */ jsx2("div", { style: styles.historyDate, children: new Date(r.date).toLocaleString() })
         ] }),
@@ -2337,6 +2602,16 @@ var styles = {
     border: "1px solid #F0D3D1",
     borderRadius: 10,
     cursor: "pointer"
+  },
+  doneToggleBtn: {
+    background: "var(--paper)",
+    color: "var(--ink-3)",
+    border: "1px solid var(--rule)"
+  },
+  doneToggleActive: {
+    background: "var(--good-bg)",
+    color: "var(--good)",
+    border: "1px solid #BFE3CC"
   },
   iconEditBtn: {
     display: "flex",
