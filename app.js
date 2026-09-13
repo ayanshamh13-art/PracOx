@@ -339,6 +339,14 @@ function App() {
     setBankId(null);
     setScreen("diag");
   };
+  const goTimer = () => {
+    setExamId(null);
+    setSubjectId(null);
+    setChapterId(null);
+    setVariant(null);
+    setBankId(null);
+    setScreen("timer");
+  };
   const goAdminSettings = () => {
     setExamId(null);
     setSubjectId(null);
@@ -406,7 +414,8 @@ function App() {
         onDiag: goDiag,
         onSettings: goAdminSettings,
         darkMode,
-        onToggleDark: toggleDarkMode
+        onToggleDark: toggleDarkMode,
+        onTimer: goTimer
       }
     ),
     /* @__PURE__ */ jsx2(Breadcrumb, { exam, subjectId, chapterId, onHome: reset, onExam: () => goSubjects(examId) }),
@@ -414,6 +423,7 @@ function App() {
       screen === "home" && /* @__PURE__ */ jsx2(ExamGrid, { onPick: goSubjects }),
       screen === "history" && /* @__PURE__ */ jsx2(HistoryScreen, { initialName: studentName, onBack: reset }),
       screen === "diag" && /* @__PURE__ */ jsx2(DiagScreen, { onBack: reset }),
+      screen === "timer" && /* @__PURE__ */ jsx2(PracticeTimerScreen, { onBack: reset }),
       screen === "admin-login" && /* @__PURE__ */ jsx2(
         AdminLoginScreen,
         {
@@ -497,7 +507,7 @@ function App() {
     toast && /* @__PURE__ */ jsx2("div", { style: { ...styles.toast, ...toast.kind === "error" ? styles.toastError : {} }, children: toast.msg })
   ] });
 }
-function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode, onToggleDark }) {
+function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode, onToggleDark, onTimer }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerMounted, setDrawerMounted] = useState(false);
   const openDrawer = () => {
@@ -594,6 +604,16 @@ function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode
                   /* @__PURE__ */ jsx2(Bug, { size: 16 }),
                   " Test storage connection"
                 ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
+              /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: "Tools" }),
+              /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => {
+                close();
+                onTimer();
+              }, children: [
+                /* @__PURE__ */ jsx2(Timer, { size: 16 }),
+                " Practice timer"
               ] })
             ] }),
             /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
@@ -3121,3 +3141,171 @@ var styles = {
 export {
   App as default
 };
+
+function PracticeTimerScreen({ onBack }) {
+  const [step, setStep] = useState("setup");
+  const [mode, setMode] = useState("per");
+  const [perSeconds, setPerSeconds] = useState(60);
+  const [totalMinutes, setTotalMinutes] = useState(10);
+  const [secondsLeft, setSecondsLeft] = useState(60);
+  const [running, setRunning] = useState(false);
+  const [questionNum, setQuestionNum] = useState(1);
+  const [finished, setFinished] = useState(false);
+  const audioCtxRef = useRef(null);
+  const ensureAudio = () => {
+    if (!audioCtxRef.current) {
+      try {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      } catch {
+      }
+    }
+    return audioCtxRef.current;
+  };
+  const playAlert = () => {
+    const ctx = ensureAudio();
+    if (ctx) {
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(1e-3, ctx.currentTime + 0.4);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      } catch {
+      }
+    }
+    if (navigator.vibrate) {
+      try {
+        navigator.vibrate([200, 100, 200]);
+      } catch {
+      }
+    }
+  };
+  useEffect(() => {
+    if (step !== "running" || !running) return;
+    const interval = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          playAlert();
+          if (mode === "per") {
+            setQuestionNum((n) => n + 1);
+            return perSeconds;
+          } else {
+            setRunning(false);
+            setFinished(true);
+            return 0;
+          }
+        }
+        return s - 1;
+      });
+    }, 1e3);
+    return () => clearInterval(interval);
+  }, [step, running, mode, perSeconds]);
+  const start = () => {
+    ensureAudio();
+    setFinished(false);
+    setQuestionNum(1);
+    setSecondsLeft(mode === "per" ? perSeconds : totalMinutes * 60);
+    setStep("running");
+    setRunning(true);
+  };
+  const togglePause = () => setRunning((r) => !r);
+  const nextQuestion = () => {
+    setQuestionNum((n) => n + 1);
+    setSecondsLeft(perSeconds);
+  };
+  const resetTimer = () => {
+    setRunning(false);
+    setFinished(false);
+    setQuestionNum(1);
+    setSecondsLeft(mode === "per" ? perSeconds : totalMinutes * 60);
+  };
+  const backToSetup = () => {
+    setRunning(false);
+    setStep("setup");
+  };
+  const fmtTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  const duration = mode === "per" ? perSeconds : totalMinutes * 60;
+  const pct = Math.max(0, Math.min(100, secondsLeft / duration * 100));
+  if (step === "setup") {
+    return /* @__PURE__ */ jsxs2("div", { children: [
+      /* @__PURE__ */ jsx2(BackRow, { onBack, label: "Back" }),
+      /* @__PURE__ */ jsx2(SectionHeading, { eyebrow: "Tool", title: "Practice timer", sub: "For working through questions in a physical book \u2014 nothing here is saved." }),
+      /* @__PURE__ */ jsxs2("div", { style: styles.singleForm, children: [
+        /* @__PURE__ */ jsx2("label", { style: styles.fieldLabel, children: "Timing mode" }),
+        /* @__PURE__ */ jsxs2("div", { style: { display: "flex", flexDirection: "column", gap: 8 }, children: [
+          /* @__PURE__ */ jsxs2("label", { style: styles.radioRow, children: [
+            /* @__PURE__ */ jsx2("input", { type: "radio", checked: mode === "per", onChange: () => setMode("per") }),
+            /* @__PURE__ */ jsxs2("div", { children: [
+              /* @__PURE__ */ jsx2("div", { style: styles.radioTitle, children: "Time each question separately" }),
+              /* @__PURE__ */ jsx2("div", { style: styles.radioSub, children: "Set seconds per question \u2014 it auto-restarts and counts up the question number each time it runs out." })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxs2("label", { style: styles.radioRow, children: [
+            /* @__PURE__ */ jsx2("input", { type: "radio", checked: mode === "total", onChange: () => setMode("total") }),
+            /* @__PURE__ */ jsxs2("div", { children: [
+              /* @__PURE__ */ jsx2("div", { style: styles.radioTitle, children: "One total countdown" }),
+              /* @__PURE__ */ jsx2("div", { style: styles.radioSub, children: "Set one total duration for the whole session \u2014 it alerts once when time runs out." })
+            ] })
+          ] })
+        ] }),
+        mode === "per" ? /* @__PURE__ */ jsxs2(Fragment, { children: [
+          /* @__PURE__ */ jsx2("label", { style: styles.fieldLabel, children: "Seconds per question" }),
+          /* @__PURE__ */ jsx2(
+            "input",
+            {
+              type: "number",
+              min: "5",
+              style: styles.input,
+              value: perSeconds,
+              onChange: (e) => setPerSeconds(Math.max(5, parseInt(e.target.value) || 60))
+            }
+          )
+        ] }) : /* @__PURE__ */ jsxs2(Fragment, { children: [
+          /* @__PURE__ */ jsx2("label", { style: styles.fieldLabel, children: "Total minutes" }),
+          /* @__PURE__ */ jsx2(
+            "input",
+            {
+              type: "number",
+              min: "1",
+              style: styles.input,
+              value: totalMinutes,
+              onChange: (e) => setTotalMinutes(Math.max(1, parseInt(e.target.value) || 10))
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs2("button", { style: { ...styles.primaryBtn, marginTop: 4, justifyContent: "center" }, onClick: start, children: [
+          /* @__PURE__ */ jsx2(Timer, { size: 15 }),
+          " Start timer"
+        ] })
+      ] })
+    ] });
+  }
+  return /* @__PURE__ */ jsxs2("div", { children: [
+    /* @__PURE__ */ jsx2(BackRow, { onBack: backToSetup, label: "Change settings" }),
+    /* @__PURE__ */ jsx2(SectionHeading, { eyebrow: "Practice timer", title: mode === "per" ? `Question ${questionNum}` : "Session countdown" }),
+    /* @__PURE__ */ jsxs2("div", { style: styles.timerRow, children: [
+      /* @__PURE__ */ jsx2(Timer, { size: 14 }),
+      /* @__PURE__ */ jsx2("span", { style: styles.timerText, children: fmtTime(secondsLeft) }),
+      /* @__PURE__ */ jsx2("div", { style: styles.timerBarTrack, children: /* @__PURE__ */ jsx2(
+        "div",
+        {
+          className: pct < 20 ? "px-pulse" : "",
+          style: { ...styles.timerBarFill, width: `${pct}%`, background: pct < 20 ? "var(--bad)" : "var(--gold)" }
+        }
+      ) })
+    ] }),
+    finished && mode === "total" && /* @__PURE__ */ jsxs2("div", { style: styles.resultCard, children: [
+      /* @__PURE__ */ jsx2("div", { style: styles.resultBand, children: "Time's up!" }),
+      /* @__PURE__ */ jsx2("div", { style: styles.resultNote, children: "Session finished \u2014 tap Reset to run it again." })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { style: styles.formRow, children: [
+      /* @__PURE__ */ jsx2("button", { style: { ...styles.primaryBtn, flex: 1, justifyContent: "center" }, onClick: togglePause, children: running ? "Pause" : "Resume" }),
+      /* @__PURE__ */ jsx2("button", { style: styles.ghostBtn, onClick: resetTimer, children: "Reset" })
+    ] }),
+    mode === "per" && /* @__PURE__ */ jsx2("button", { style: { ...styles.ghostBtn, marginTop: 8, width: "100%", justifyContent: "center" }, onClick: nextQuestion, children: "Skip to next question" })
+  ] });
+}
