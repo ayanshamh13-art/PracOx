@@ -310,6 +310,9 @@ function App() {
   useEffect(() => {
     (async () => setAdminPin(await sGet("admin-settings:pin", null)))();
   }, []);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
   const showToast = (msg, kind = "info") => {
     setToast({ msg, kind });
     setTimeout(() => setToast(null), kind === "error" ? 5500 : 2600);
@@ -618,7 +621,7 @@ function TopBar({ mode, setMode, onHome, onHistory, onDiag, onSettings, darkMode
             ] }),
             /* @__PURE__ */ jsxs2("div", { style: styles.drawerSection, children: [
               /* @__PURE__ */ jsx2("div", { style: styles.drawerLabel, children: "Appearance" }),
-              /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: onToggleDark, children: [
+              /* @__PURE__ */ jsxs2("button", { style: styles.drawerItem, onClick: () => { close(); onToggleDark(); }, children: [
                 darkMode ? /* @__PURE__ */ jsx2(Sun, { size: 16 }) : /* @__PURE__ */ jsx2(Moon, { size: 16 }),
                 darkMode ? "Switch to light mode" : "Switch to dark mode"
               ] })
@@ -2491,10 +2494,14 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focu
   --rule: #D8DCE3;
   --gold: #E8A33D;
   --gold-dark: #B97D22;
+  --gold-bg: #FBF2E2;
+  --gold-border: #F0DDB3;
   --good: #3F8F5F;
   --good-bg: #E6F4EB;
+  --good-border: #BFE3CC;
   --bad: #C1443D;
   --bad-bg: #FBEAE9;
+  --bad-border: #F0D3D1;
 }
 [data-theme="dark"] {
   --ink: #EDF1F8;
@@ -2505,10 +2512,14 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focu
   --rule: #2C3852;
   --gold: #EFB65B;
   --gold-dark: #F5C878;
+  --gold-bg: #3A2E14;
+  --gold-border: #5A4820;
   --good: #5BC183;
   --good-bg: #163524;
+  --good-border: #2F5940;
   --bad: #E17870;
   --bad-bg: #3B1A1B;
+  --bad-border: #5A2E2E;
 }
 * { box-sizing: border-box; }
 input, textarea, button { font-family: 'IBM Plex Sans', sans-serif; }
@@ -2670,7 +2681,7 @@ var styles = {
     fontSize: 11,
     fontWeight: 500,
     color: "var(--gold-dark)",
-    background: "#FBF2E2",
+    background: "var(--gold-bg)",
     padding: "3px 7px",
     borderRadius: 6,
     flexShrink: 0
@@ -2717,7 +2728,7 @@ var styles = {
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 10.5,
     color: "var(--gold-dark)",
-    background: "#FBF2E2",
+    background: "var(--gold-bg)",
     padding: "3px 8px",
     borderRadius: 999,
     flexShrink: 0
@@ -2743,16 +2754,16 @@ var styles = {
   doneToggleActive: {
     background: "var(--good-bg)",
     color: "var(--good)",
-    border: "1px solid #BFE3CC"
+    border: "1px solid var(--good-border)"
   },
   iconEditBtn: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     width: 38,
-    background: "#EFE6D3",
+    background: "var(--gold-bg)",
     color: "var(--gold-dark)",
-    border: "1px solid #F0DDB3",
+    border: "1px solid var(--gold-border)",
     borderRadius: 10,
     cursor: "pointer"
   },
@@ -2880,8 +2891,8 @@ var styles = {
     color: "var(--ink-2)",
     whiteSpace: "pre-wrap"
   },
-  optRowCorrect: { background: "var(--good-bg)", borderColor: "#BFE3CC", color: "var(--good)", fontWeight: 500 },
-  optRowWrong: { background: "var(--bad-bg)", borderColor: "#F0D3D1", color: "var(--bad)", fontWeight: 500 },
+  optRowCorrect: { background: "var(--good-bg)", borderColor: "var(--good-border)", color: "var(--good)", fontWeight: 500 },
+  optRowWrong: { background: "var(--bad-bg)", borderColor: "var(--bad-border)", color: "var(--bad)", fontWeight: 500 },
   optButton: {
     display: "flex",
     alignItems: "center",
@@ -2897,7 +2908,7 @@ var styles = {
     width: "100%",
     whiteSpace: "pre-wrap"
   },
-  optButtonActive: { background: "#EFE6D3", borderColor: "var(--gold)", color: "var(--ink)", fontWeight: 500 },
+  optButtonActive: { background: "var(--gold-bg)", borderColor: "var(--gold)", color: "var(--ink)", fontWeight: 500 },
   optLetter: {
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 11,
@@ -2931,8 +2942,8 @@ var styles = {
     display: "flex",
     alignItems: "center",
     gap: 6,
-    background: "#FBF2E2",
-    border: "1px solid #F0DDB3",
+    background: "var(--gold-bg)",
+    border: "1px solid var(--gold-border)",
     color: "var(--gold-dark)",
     borderRadius: 8,
     padding: "7px 10px",
@@ -2984,8 +2995,8 @@ var styles = {
   explanationNote: {
     marginTop: 10,
     padding: "9px 11px",
-    background: "#FBF2E2",
-    border: "1px solid #F0DDB3",
+    background: "var(--gold-bg)",
+    border: "1px solid var(--gold-border)",
     borderRadius: 8,
     fontSize: 12.5,
     color: "var(--ink-2)",
